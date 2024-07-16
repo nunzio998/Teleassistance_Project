@@ -6,29 +6,29 @@ from sklearn.preprocessing import LabelEncoder
 file_path = 'challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
 
-# Identificazione delle variabili numeriche e categoriche
-numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+# Carico il dataset relativo ai codici ISTAT dei comuni italiani in modo da poter fare imputation
+df_istat = pd.read_excel('Codici-statistici-e-denominazioni-al-30_06_2024.xlsx')
 
-# Label Encoding delle variabili categoriche
-label_encoders = {}
-for col in categorical_cols:
-    le = LabelEncoder()
-    df[col] = le.fit_transform(df[col].astype(str))
-    label_encoders[col] = le
+codice_comune_to_nome = pd.Series(df_istat['Denominazione in italiano'].values, index=df_istat['Codice Comune formato alfanumerico'])
 
-# Imputazione dei valori mancanti
-imputer = IterativeImputer()
-df_imputed = imputer.fit_transform(df)
-df_imputed = pd.DataFrame(df_imputed, columns=df.columns)
+print(codice_comune_to_nome)
 
-# Decodifica delle variabili categoriche
-for col in categorical_cols:
-    le = label_encoders[col]
-    df_imputed[col] = le.inverse_transform(df_imputed[col].astype(int))
 
-# Salvataggio del dataset pulito
-output_file_path = 'imputed_challenge_campus_biomedico_2024.parquet'
-df_imputed.to_csv('imputed_challenge_campus_biomedico_2024.csv', index=False)
-df_imputed.to_parquet(output_file_path)
-print(f"Dataset pulito salvato in: {output_file_path}")
+# Funzione per riempire i valori mancanti di comune_residenza
+def fill_missing_comune_residenza(row):
+    if pd.isna(row['comune_residenza']):
+        return codice_comune_to_nome.get(row['codice_comune_residenza'], row['comune_residenza'])
+    return row['comune_residenza']
+
+# Applicazione della funzione al dataframe
+df['comune_residenza'] = df.apply(fill_missing_comune_residenza, axis=1)
+
+
+colonne_con_mancanti = df.columns[df.isnull().any()]
+
+print(df[colonne_con_mancanti].isnull().sum())
+
+print('-----------------------------------')
+
+
+#df.to_csv('imputed_challenge_campus_biomedico_2024.csv', index=False)
