@@ -1,17 +1,21 @@
 import pandas as pd
 from data_prep.imputation import imputate_missing_values
-from data_prep.feature_selection import remove_columns_with_unique_correlation
+from data_prep.feature_selection import feature_selection_execution
 
 
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
 
+#df.to_csv('datasets/challenge_campus_biomedico_2024.csv', index=False)
+
 # Imputazione dei valori mancanti
 df = imputate_missing_values(df)
 
-# Rimozione delle colonne con correlazione univoca
-df = remove_columns_with_unique_correlation(df)
+#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed.csv', index=False)
+
+# Features Selection
+df = feature_selection_execution(df)
 
 
 '''
@@ -31,3 +35,15 @@ data_disdetta                  460639
 #  televisita non è avvenuta ma è stata annullata. In questo modo non ci saranno valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione'
 
 # TODO: rimuovere colonne relative a 'data_disdetta' in quanto non utili. Dopo il secondo TODO per quella feature ci saranno solo valori mancanti
+
+"""
+DOPO TODO:
+Statistiche valori mancanti dopo l'imputazione:
+
+codice_provincia_residenza      27016
+comune_residenza                  130
+codice_provincia_erogazione     27396
+data_disdetta                  460639
+dtype: int64
+-----------------------------------
+"""
