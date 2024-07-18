@@ -2,11 +2,11 @@ import pandas as pd
 
 
 def imputate_missing_values(df):
-    '''
+    """
     Imputa i valori mancanti del dataset df.
     :param df:
     :return:
-    '''
+    """
     # Visualizzo le statistiche dei valori mancanti prima dell'imputazione
     print("Statistiche valori mancanti prima dell'imputazione:\n")
     colonne_con_mancanti = df.columns[df.isnull().any()]
@@ -18,6 +18,9 @@ def imputate_missing_values(df):
 
     # Imputazione dei valori mancanti relativi a ora_inizio_erogazione e ora_fine_erogazione
     df = imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df)
+
+    # Rimozione dei campioni con 'data_disdetta' non nullo
+    df = remove_disdette(df)
 
     # Visualizzo le statistiche dei valori mancanti dopo l'imputazione
     print("Statistiche valori mancanti dopo l'imputazione:\n")
@@ -55,15 +58,24 @@ def imputate_comune_residenza(df) -> pd.DataFrame:
     return df
 
 
-def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
+def remove_disdette(df) -> pd.DataFrame:
     '''
+    Rimuove i campioni con 'data_disdetta' non nullo.
+    :param df:
+    :return: df senza campioni con 'data_disdetta' non nullo.
+    '''
+    df = df[df['data_disdetta'].isnull()]
+    return df
+
+
+def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
+    """
     Imputa i valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione' del dataset df.
     :param df:
     :return:
-    '''
+    """
     # Verifico se i valori mancanti sono relativi alle medesime righe del dataset:
     check_missing_values_same_row(df)
-    df.to_csv('datasets/df_missing_values_same_row.csv', index=False)
 
     # Conversione delle colonne 'ora_inizio_erogazione' e 'ora_fine_erogazione' in formato datetime
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce', utc=True)
@@ -92,7 +104,6 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
 
     check_missing_values_start(df)
     check_missing_values_end(df)
-    df.to_csv('datasets/df_imputato.csv', index=False)
 
     return df
 
