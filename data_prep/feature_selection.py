@@ -48,6 +48,16 @@ def remove_columns_with_unique_correlation(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def remove_data_disdetta(df) -> pd.DataFrame:
+    """
+    Rimuove i campioni con 'data_disdetta' non nullo.
+    :param df:
+    :return: df senza campioni con 'data_disdetta' non nullo.
+    """
+    df.drop(columns=['data_disdetta'], inplace=True)
+    return df
+
+
 def feature_selection_execution(df) -> pd.DataFrame:
     '''
     Esegue la feature selection
@@ -55,4 +65,5 @@ def feature_selection_execution(df) -> pd.DataFrame:
     :return:
     '''
     df = remove_columns_with_unique_correlation(df)
+    df = remove_data_disdetta(df)
     return df
