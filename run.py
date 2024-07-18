@@ -18,7 +18,7 @@ df = remove_columns_with_unique_correlation(df)
 Statistiche valori mancanti dopo l'imputazione:
 
 codice_provincia_residenza      28380
-comune_residenza                  135
+comune_residenza                  135 --> da non toccare perché relativi al comune di None in provincia di Torino
 codice_provincia_erogazione     28776
 ora_inizio_erogazione           23652
 ora_fine_erogazione             23652
