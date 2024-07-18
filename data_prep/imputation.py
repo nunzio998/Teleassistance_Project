@@ -1,6 +1,4 @@
 import pandas as pd
-from fancyimpute import IterativeImputer
-from sklearn.preprocessing import LabelEncoder
 
 
 def imputate_missing_values(df):
@@ -9,7 +7,6 @@ def imputate_missing_values(df):
     :param df:
     :return:
     '''
-
     # Visualizzo le statistiche dei valori mancanti prima dell'imputazione
     print("Statistiche valori mancanti prima dell'imputazione:\n")
     colonne_con_mancanti = df.columns[df.isnull().any()]
@@ -67,47 +64,35 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
     # Verifico se i valori mancanti sono relativi alle medesime righe del dataset:
     check_missing_values_same_row(df)
     df.to_csv('datasets/df_missing_values_same_row.csv', index=False)
-    # Ho verificato che le occorrenze di valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione' riguardano le stesse righe.
-    # Quindi, dove manca uno dei due valori manca anche l'altro. Pertanto, posso procedere con l'imputazione dei valori mancanti.
 
-    # Ora, per ogni tipologia di teleassistenza, calcolo la media delle ore di inizio erogazione. Questo valore sarà utilizzato per l'imputazione.
-
-    # Conversione della colonna 'ora_inizio_erogazione' in formato datetime
+    # Conversione delle colonne 'ora_inizio_erogazione' e 'ora_fine_erogazione' in formato datetime
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce', utc=True)
+    df['ora_fine_erogazione'] = pd.to_datetime(df['ora_fine_erogazione'], errors='coerce', utc=True)
 
-    # Filtrare il DataFrame per rimuovere le righe con valori mancanti in 'ora_inizio_erogazione'
-    df_non_missing = df.dropna(subset=['ora_inizio_erogazione'])
-
-    # Converti i timestamp in secondi dall'epoca Unix usando .loc
-    df_non_missing.loc[:, 'ora_inizio_erogazione_sec'] = df_non_missing['ora_inizio_erogazione'].apply(
-        lambda x: x.timestamp())
-
-    # Raggruppa il DataFrame filtrato per 'codice_descrizione_attivita' e calcola la media dei secondi
-    media_ora_inizio_sec = df_non_missing.groupby('codice_descrizione_attivita')['ora_inizio_erogazione_sec'].mean()
-
-    # Converti la media dei secondi in datetime
-    media_ora_inizio = pd.to_datetime(media_ora_inizio_sec, unit='s', utc=True)
-
-    # Formatta il datetime nel formato richiesto '2019-02-04T11:00:28+01:00'
-    media_ora_inizio_formatted = media_ora_inizio.dt.strftime('%Y-%m-%dT%H:%M:%S%z')
+    # Calcolo della durata media delle attività per ciascun 'codice_descrizione_attivita'
+    df_non_missing = df.dropna(subset=['ora_inizio_erogazione', 'ora_fine_erogazione']).copy()
+    df_non_missing['durata'] = (
+                df_non_missing['ora_fine_erogazione'] - df_non_missing['ora_inizio_erogazione']).dt.total_seconds()
+    media_durata_sec = df_non_missing.groupby('codice_descrizione_attivita')['durata'].mean()
+    media_durata = pd.to_timedelta(media_durata_sec, unit='s')
 
     # Converti la Series risultante in un dizionario
-    media_ora_inizio_dict = media_ora_inizio_formatted.to_dict()
+    media_durata_dict = media_durata.to_dict()
 
-    # Itera attraverso ogni riga del DataFrame originale e imputa i valori mancanti per 'ora_inizio_erogazione'
+    # Itera attraverso ogni riga del DataFrame originale e imputa i valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione'
     for index, row in df.iterrows():
-        if pd.isnull(row['ora_inizio_erogazione']):  # Controlla se è mancante
+        if pd.isnull(row['ora_inizio_erogazione']) and pd.isnull(row['ora_fine_erogazione']) and pd.isnull(
+                row['data_disdetta']):
             codice_attivita = row['codice_descrizione_attivita']
-            if codice_attivita in media_ora_inizio_dict:  # Controlla se c'è una corrispondenza nel dizionario
-                df.at[index, 'ora_inizio_erogazione'] = pd.to_datetime(media_ora_inizio_dict[codice_attivita])
+            if codice_attivita in media_durata_dict:
+                durata_media = media_durata_dict[codice_attivita]
+                data_erogazione = pd.to_datetime(row['data_erogazione'], utc=True)
+                df.at[index, 'ora_inizio_erogazione'] = data_erogazione.strftime('%Y-%m-%d %H:%M:%S%z')
+                df.at[index, 'ora_fine_erogazione'] = (data_erogazione + durata_media).strftime('%Y-%m-%d %H:%M:%S%z')
 
     check_missing_values_start(df)
-
-
-    # TODO Imputazione dei valori mancanti per 'ora_fine_erogazione'
-
-
     check_missing_values_end(df)
+    df.to_csv('datasets/df_imputato.csv', index=False)
 
     return df
 
@@ -118,52 +103,30 @@ def check_missing_values_same_row(df):
     :param df:
     :return:
     '''
-    # Creazione di una maschera booleana per identificare le righe con entrambi i valori mancanti
     missing_both = df['ora_inizio_erogazione'].isna() & df['ora_fine_erogazione'].isna()
-
-    # Filtrare il DataFrame per ottenere solo le righe con entrambi i valori mancanti
     rows_with_both_missing = df[missing_both]
-
-    # Contare il numero di righe con entrambi i valori mancanti
     num_rows_with_both_missing = len(rows_with_both_missing)
-
     print(f"Numero di righe con 'ora_inizio_erogazione' e 'ora_fine_erogazione' mancanti: {num_rows_with_both_missing}")
-    # print(rows_with_both_missing)
-
 
 def check_missing_values_start(df):
     '''
-    Verifica se i valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione' riguardano le stesse righe.
+    Verifica se ci sono valori mancanti per 'ora_inizio_erogazione'.
     :param df:
     :return:
     '''
-    # Creazione di una maschera booleana per identificare le righe con entrambi i valori mancanti
-    missing_both = df['ora_inizio_erogazione'].isna()
-
-    # Filtrare il DataFrame per ottenere solo le righe con entrambi i valori mancanti
-    rows_with_both_missing = df[missing_both]
-
-    # Contare il numero di righe con entrambi i valori mancanti
-    num_rows_with_both_missing = len(rows_with_both_missing)
-
-    print(f"Numero di righe con 'ora_inizio_erogazione' e 'ora_fine_erogazione' mancanti: {num_rows_with_both_missing}")
-    # print(rows_with_both_missing)
+    missing_start = df['ora_inizio_erogazione'].isna()
+    rows_with_start_missing = df[missing_start]
+    num_rows_with_start_missing = len(rows_with_start_missing)
+    print(f"Numero di righe con 'ora_inizio_erogazione' mancante: {num_rows_with_start_missing}")
 
 
 def check_missing_values_end(df):
     '''
-    Verifica se i valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione' riguardano le stesse righe.
+    Verifica se ci sono valori mancanti per 'ora_fine_erogazione'.
     :param df:
     :return:
     '''
-    # Creazione di una maschera booleana per identificare le righe con entrambi i valori mancanti
-    missing_both = df['ora_fine_erogazione'].isna()
-
-    # Filtrare il DataFrame per ottenere solo le righe con entrambi i valori mancanti
-    rows_with_both_missing = df[missing_both]
-
-    # Contare il numero di righe con entrambi i valori mancanti
-    num_rows_with_both_missing = len(rows_with_both_missing)
-
-    print(f"Numero di righe con 'ora_inizio_erogazione' e 'ora_fine_erogazione' mancanti: {num_rows_with_both_missing}")
-    # print(rows_with_both_missing)
+    missing_end = df['ora_fine_erogazione'].isna()
+    rows_with_end_missing = df[missing_end]
+    num_rows_with_end_missing = len(rows_with_end_missing)
+    print(f"Numero di righe con 'ora_fine_erogazione' mancante: {num_rows_with_end_missing}")
