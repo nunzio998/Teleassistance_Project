@@ -1,22 +1,26 @@
 import pandas as pd
 from data_prep.imputation import imputate_missing_values
 from data_prep.feature_selection import feature_selection_execution
-
+from data_prep.feature_extraction import feature_extraction
 
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
 
-#df.to_csv('datasets/challenge_campus_biomedico_2024.csv', index=False)
+# df.to_csv('datasets/challenge_campus_biomedico_2024.csv', index=False)
 
 # Imputazione dei valori mancanti
 df = imputate_missing_values(df)
 
-#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed.csv', index=False)
+# df.to_csv('datasets/challenge_campus_biomedico_2024_imputed.csv', index=False)
 
 # Features Selection
 df = feature_selection_execution(df)
 
+# Feature extraction
+df = feature_extraction(df)
+
+#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
 
 '''
 Statistiche valori mancanti dopo l'imputazione:
