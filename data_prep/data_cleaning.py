@@ -31,6 +31,16 @@ def imputate_missing_values(df):
     return df
 
 
+def remove_duplicati(df) -> pd.DataFrame:
+    '''
+    Rimuove i duplicati dal dataset df.
+    :param df:
+    :return:
+    '''
+    df.drop_duplicates(inplace=True)
+    return df
+
+
 def imputate_comune_residenza(df) -> pd.DataFrame:
     '''
     Imputa i valori mancanti per 'comune_residenza' del dataset df.
@@ -84,7 +94,7 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
     # Calcolo della durata media delle attività per ciascun 'codice_descrizione_attivita'
     df_non_missing = df.dropna(subset=['ora_inizio_erogazione', 'ora_fine_erogazione']).copy()
     df_non_missing['durata'] = (
-                df_non_missing['ora_fine_erogazione'] - df_non_missing['ora_inizio_erogazione']).dt.total_seconds()
+            df_non_missing['ora_fine_erogazione'] - df_non_missing['ora_inizio_erogazione']).dt.total_seconds()
     media_durata_sec = df_non_missing.groupby('codice_descrizione_attivita')['durata'].mean()
     media_durata = pd.to_timedelta(media_durata_sec, unit='s')
 
@@ -118,6 +128,7 @@ def check_missing_values_same_row(df):
     rows_with_both_missing = df[missing_both]
     num_rows_with_both_missing = len(rows_with_both_missing)
     print(f"Numero di righe con 'ora_inizio_erogazione' e 'ora_fine_erogazione' mancanti: {num_rows_with_both_missing}")
+
 
 def check_missing_values_start(df):
     '''
