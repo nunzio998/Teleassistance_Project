@@ -1,7 +1,37 @@
 import pandas as pd
 
 
-def imputate_missing_values(df):
+def data_cleaning(df) -> pd.DataFrame:
+    """
+    Esegue le operazioni di pulizia del dataset df.
+    1) imputazione dei valori mancanti e rimozione dei campioni con 'data_disdetta' non nullo.
+    2) Identificazione e rimozione outliers.
+    3) Gestione dei dati rumorosi.
+    4) Rimozione dei duplicati.
+    :param df:
+    :return:
+    """
+    # Imputazione dei valori mancanti
+    df = imputate_missing_values(df)
+
+    # Rimozione dei campioni con 'data_disdetta' non nullo
+    df = remove_disdette(df)
+
+    # Identificazione e rimozione outliers dalle colonne specificate
+    df = identify_and_remove_outliers(df, ['ora_inizio_erogazione', 'ora_fine_erogazione'])
+
+    # Gestione dei dati rumorosi nella colonna specificata
+    df = smooth_noisy_data(df, 'ora_inizio_erogazione')
+
+    # Rimozione dei duplicati
+    df = remove_duplicati(df)
+
+    # TODO: stabilire a quali features applicare 'identify_and_remove_outliers' e 'smooth_noisy_data'.
+
+    return df
+
+
+def imputate_missing_values(df) -> pd.DataFrame:
     """
     Imputa i valori mancanti del dataset df. Dopo una prima analisi si hanno i seguenti risultati:
     Statistiche valori mancanti prima dell'imputazione:
@@ -32,9 +62,6 @@ def imputate_missing_values(df):
     # Imputazione dei valori mancanti relativi a ora_inizio_erogazione e ora_fine_erogazione
     df = imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df)
 
-    # Rimozione dei campioni con 'data_disdetta' non nullo
-    df = remove_disdette(df)
-
     # Visualizzo le statistiche dei valori mancanti dopo l'imputazione
     print("Statistiche valori mancanti dopo l'imputazione:\n")
     colonne_con_mancanti = df.columns[df.isnull().any()]
@@ -45,21 +72,59 @@ def imputate_missing_values(df):
 
 
 def remove_duplicati(df) -> pd.DataFrame:
-    '''
+    """
     Rimuove i duplicati dal dataset df.
     :param df:
     :return:
-    '''
+    """
     df.drop_duplicates(inplace=True)
     return df
 
 
+def smooth_noisy_data(df, column, window_size=3):
+    """
+    Smooth noisy data using moving average.
+    :param df: Il DataFrame originale.
+    :param column: La colonna su cui applicare il smoothing.
+    :param window_size: La dimensione della finestra per la media mobile.
+    :return: Un DataFrame con i dati smussati.
+    """
+    if pd.api.types.is_datetime64_any_dtype(df[column]):
+        # Convert datetime to timestamp
+        df[column] = df[column].apply(lambda x: x.timestamp() if pd.notnull(x) else x)
+        # Apply rolling mean
+        df[column] = df[column].rolling(window=window_size, min_periods=1).mean()
+        # Convert timestamp back to datetime
+        df[column] = pd.to_datetime(df[column], unit='s', utc=True)
+    else:
+        df[column] = df[column].rolling(window=window_size, min_periods=1).mean()
+
+    return df
+
+
+def identify_and_remove_outliers(df, columns):
+    """
+    Identifica e rimuove outliers utilizzando il metodo IQR.
+    :param df: Il DataFrame originale.
+    :param columns: Le colonne su cui applicare la rimozione degli outliers.
+    :return: Un DataFrame senza outliers.
+    """
+    for column in columns:
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        df = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+    return df
+
+
 def imputate_comune_residenza(df) -> pd.DataFrame:
-    '''
+    """
     Imputa i valori mancanti per 'comune_residenza' del dataset df.
     :param df:
     :return:
-    '''
+    """
     # Carico il dataset relativo ai codici ISTAT dei comuni italiani in modo da poter fare imputation
     df_istat = pd.read_excel('datasets/Codici-statistici-e-denominazioni-al-30_06_2024.xlsx')
 
@@ -82,11 +147,11 @@ def imputate_comune_residenza(df) -> pd.DataFrame:
 
 
 def remove_disdette(df) -> pd.DataFrame:
-    '''
+    """
     Rimuove i campioni con 'data_disdetta' non nullo.
     :param df:
     :return: df senza campioni con 'data_disdetta' non nullo.
-    '''
+    """
     df = df[df['data_disdetta'].isnull()]
     return df
 
@@ -132,11 +197,11 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
 
 
 def check_missing_values_same_row(df):
-    '''
+    """
     Verifica se i valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione' riguardano le stesse righe.
     :param df:
     :return:
-    '''
+    """
     missing_both = df['ora_inizio_erogazione'].isna() & df['ora_fine_erogazione'].isna()
     rows_with_both_missing = df[missing_both]
     num_rows_with_both_missing = len(rows_with_both_missing)
@@ -144,11 +209,11 @@ def check_missing_values_same_row(df):
 
 
 def check_missing_values_start(df):
-    '''
+    """
     Verifica se ci sono valori mancanti per 'ora_inizio_erogazione'.
     :param df:
     :return:
-    '''
+    """
     missing_start = df['ora_inizio_erogazione'].isna()
     rows_with_start_missing = df[missing_start]
     num_rows_with_start_missing = len(rows_with_start_missing)
@@ -156,11 +221,11 @@ def check_missing_values_start(df):
 
 
 def check_missing_values_end(df):
-    '''
+    """
     Verifica se ci sono valori mancanti per 'ora_fine_erogazione'.
     :param df:
     :return:
-    '''
+    """
     missing_end = df['ora_fine_erogazione'].isna()
     rows_with_end_missing = df[missing_end]
     num_rows_with_end_missing = len(rows_with_end_missing)
