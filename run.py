@@ -1,5 +1,5 @@
 import pandas as pd
-from data_prep.data_cleaning import imputate_missing_values
+from data_prep.data_cleaning import data_cleaning
 from data_prep.feature_selection import feature_selection_execution
 from feature_extraction.feature_extraction import feature_extraction
 
@@ -7,12 +7,12 @@ from feature_extraction.feature_extraction import feature_extraction
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
 
-# df.to_csv('datasets/challenge_campus_biomedico_2024.csv', index=False)
+# Visualizzazione del numero di righe e colonne del dataset
+num_rows, num_columns = df.shape
+print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
 
-# Imputazione dei valori mancanti
-df = imputate_missing_values(df)
-
-# df.to_csv('datasets/challenge_campus_biomedico_2024_imputed.csv', index=False)
+# Data Cleaning
+df = data_cleaning(df)
 
 # Features Selection
 df = feature_selection_execution(df)
@@ -21,6 +21,10 @@ df = feature_selection_execution(df)
 df = feature_extraction(df)
 
 #df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
+
+# Visualizzazione del numero di righe e colonne del dataset
+num_rows, num_columns = df.shape
+print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
 
 '''
 Statistiche valori mancanti dopo l'imputazione:
