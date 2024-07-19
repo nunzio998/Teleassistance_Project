@@ -3,7 +3,20 @@ import pandas as pd
 
 def imputate_missing_values(df):
     """
-    Imputa i valori mancanti del dataset df.
+    Imputa i valori mancanti del dataset df. Dopo una prima analisi si hanno i seguenti risultati:
+    Statistiche valori mancanti prima dell'imputazione:
+
+    codice_provincia_residenza      28380
+    comune_residenza                  135
+    codice_provincia_erogazione     28776
+    ora_inizio_erogazione           28181
+    ora_fine_erogazione             28181
+    data_disdetta                  460639
+
+    'codice_provincia_residenza' e 'codice_provincia_erogazione' non vengono imputati in quanto saranno rimossi
+    successivamente. Inoltre anche 'data_disdetta' non viene imputato. L'imputazione fatta per 'comune_residenza' non
+    produce risultati in quanto i valori mancanti sono relativi al comune di 'None', motivo per il quale non si può
+    parlare di missing values. 'ora_inizio_erogazione' e 'ora_fine_erogazione' vengono imputati correttamente.
     :param df:
     :return:
     """
