@@ -2,11 +2,11 @@ import pandas as pd
 
 
 def remove_columns_with_unique_correlation(df: pd.DataFrame) -> pd.DataFrame:
-    '''
+    """
     Rimuove le colonne con correlazione univoca
     :param df:
     :return:
-    '''
+    """
 
     # Lista di tuple contenenti le coppie di colonne da confrontare
     coppie_colonne = [
