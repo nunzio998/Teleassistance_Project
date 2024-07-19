@@ -1,7 +1,7 @@
 import pandas as pd
 from data_prep.imputation import imputate_missing_values
 from data_prep.feature_selection import feature_selection_execution
-from data_prep.feature_extraction import feature_extraction
+from feature_extraction.feature_extraction import feature_extraction
 
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
