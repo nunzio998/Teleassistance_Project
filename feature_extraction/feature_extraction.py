@@ -3,6 +3,11 @@ from datetime import datetime
 
 
 def extract_durata_televisita(df):
+    """
+    Calcola la durata della televisita tramite l'ora di inizio erogazione e l'ora di fine erogazione
+    :param df:
+    :return: dataframe
+    """
     # Calcolare la durata della televisita
     # Assicurarsi che 'ora_inizio_erogazione' e 'ora_fine_erogazione' siano in formato datetime
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce')
@@ -15,12 +20,16 @@ def extract_durata_televisita(df):
 
 
 def extract_eta_paziente(df):
+    """
+    Calcola l'età del paziente tramite la data di nascita
+    :param df:
+    :return:
+    """
     # Assicurarsi che 'data_nascita' sia in formato datetime
     df['data_nascita'] = pd.to_datetime(df['data_nascita'], errors='coerce')
 
     # Calcolare l'età in anni
     current_date = datetime.now()
-
     # Funzione per calcolare l'età
     def calcola_eta(row):
         birth_date = row['data_nascita']

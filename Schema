@@ -1,0 +1,42 @@
+DATA PRE-PROCESSING
+
+- DATA CLEANING:
+  1. Imputazione dei valori mancanti
+  2. Rimozione dei campioni
+  3. Identificazione e rimozione outlier nelle colonne specificate
+  4. Gestione dati rumorosi
+  5. Rimozione dei duplicati
+
+- TRASFORMAZIONE DEI DATI
+  1. Normalizzazione min-max
+  2. Standardizzazione
+  3. Aggregazione dei dati
+  4. Esegue la trasformazione dei dati sul DataFrame
+
+- RIDUZIONE DEI DATI (FEATURE SELECTION)
+  1. Rimuovere colonne correlate (TODO)
+  2. Rimuovere campioni con data disdetta
+
+- FEATURE EXTRACTION
+  1. Estrazione durata televisita
+  2. Estrazione età paziente
+  3. Estrazione incremento televisite (TODO)
+
+  ==> Estrazione numero di visite per tipologia
+  ==> Correlazione dell'aumento o diminuzione del numero di visite nel tempo
+  ==> Cerca correlazione fra il numero totali di visite e le altre feature: es. visita-età,
+  visita-sesso, visita-regione
+  ==> Cerca correlazione fra il numero totali di visite SPECIFICHE e le altre feature: es. visita-età,
+      visita-sesso, visita-regione
+  ==>
+
+
+L'obiettivo è vedere come si sta diffondendo la telemedicina, per garantire che tutte le persone siano curabili
+senza discriminazioni. Vogliamo capire comprendere quali fattori influenzano la crescita o il cambiamento
+nell'utilizzo di questo servizio sanitario remoto.
+DOMANDE:
+- Ci sono delle zone in cui la diffusione è più alta?
+- Quali visite stanno aumentando nel tempo e quali diminuendo? Perchè?
+- Voglio discriminare le teleassistenze che hanno un numero più alto o più basso.
+
+
