@@ -18,13 +18,13 @@ def data_cleaning(df) -> pd.DataFrame:
     df = remove_disdette(df)
 
     # Identificazione e rimozione outliers dalle colonne specificate
-    df = identify_and_remove_outliers(df, ['ora_inizio_erogazione', 'ora_fine_erogazione'])
+    #df = identify_and_remove_outliers(df, ['ora_inizio_erogazione', 'ora_fine_erogazione'])
 
     # Gestione dei dati rumorosi nella colonna specificata
-    df = smooth_noisy_data(df, 'ora_inizio_erogazione')
+    #df = smooth_noisy_data(df, 'ora_inizio_erogazione')
 
     # Rimozione dei duplicati
-    df = remove_duplicati(df)
+    #df = remove_duplicati(df)
 
     # TODO: stabilire a quali features applicare 'identify_and_remove_outliers' e 'smooth_noisy_data'.
 
@@ -165,7 +165,8 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
     # Verifico se i valori mancanti sono relativi alle medesime righe del dataset:
     check_missing_values_same_row(df)
 
-    # Conversione delle colonne 'ora_inizio_erogazione' e 'ora_fine_erogazione' in formato datetime
+    # Conversione delle colonne 'data_erogazione', 'ora_inizio_erogazione' e 'ora_fine_erogazione' in formato datetime
+    df['data_erogazione'] = pd.to_datetime(df['data_erogazione'], errors='coerce', utc=True)
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce', utc=True)
     df['ora_fine_erogazione'] = pd.to_datetime(df['ora_fine_erogazione'], errors='coerce', utc=True)
 
@@ -178,18 +179,25 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
 
     # Converti la Series risultante in un dizionario
     media_durata_dict = media_durata.to_dict()
+    #print(media_durata_dict)
 
-    # Itera attraverso ogni riga del DataFrame originale e imputa i valori mancanti per 'ora_inizio_erogazione' e 'ora_fine_erogazione'
-    for index, row in df.iterrows():
+    # Funzione di supporto per l'imputazione
+    def imputazione_riga(row):
         if pd.isnull(row['ora_inizio_erogazione']) and pd.isnull(row['ora_fine_erogazione']) and pd.isnull(
                 row['data_disdetta']):
             codice_attivita = row['codice_descrizione_attivita']
             if codice_attivita in media_durata_dict:
+                #print(f"data erogazione: {row['data_erogazione']}. Dati imputati: {row['ora_inizio_erogazione']} , {row['ora_fine_erogazione']}")
                 durata_media = media_durata_dict[codice_attivita]
-                data_erogazione = pd.to_datetime(row['data_erogazione'], utc=True)
-                df.at[index, 'ora_inizio_erogazione'] = data_erogazione.strftime('%Y-%m-%d %H:%M:%S%z')
-                df.at[index, 'ora_fine_erogazione'] = (data_erogazione + durata_media).strftime('%Y-%m-%d %H:%M:%S%z')
+                data_erogazione = row['data_erogazione']
+                row['ora_inizio_erogazione'] = data_erogazione
+                row['ora_fine_erogazione'] = data_erogazione + durata_media
+                #print(f"data erogazione: {row['data_erogazione']}. Dati imputati: {row['ora_inizio_erogazione']} , {row['ora_fine_erogazione']}")
+        return row
 
+    # Applica la funzione di imputazione a tutto il DataFrame
+    df = df.apply(imputazione_riga, axis=1)
+    #print(df.iloc[8])
     check_missing_values_start(df)
     check_missing_values_end(df)
 
