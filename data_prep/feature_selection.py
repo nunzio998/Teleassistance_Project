@@ -57,6 +57,26 @@ def remove_data_disdetta(df) -> pd.DataFrame:
     df.drop(columns=['data_disdetta'], inplace=True)
     return df
 
+def remove_regione_erogazione(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rimuove la colonna 'regione_erogazione' dal DataFrame.
+    :param df:
+    :return: df senza la colonna 'regione_erogazione'.
+    """
+    df.drop(columns=['regione_erogazione'], inplace=True)
+    return df
+
+
+def check_regione_residenza_equals_regione_erogazione(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Verifica se 'regione_residenza' è uguale a 'regione_erogazione'per ogni campione. Se è falso, automaticamente
+    anche i dati relativi a asl, comune e provincia non saranno uguali per tutti i campioni. Quindi non si potranno
+    eliminare le relative feature poiché è presente contenuto informativo.
+    :param df:
+    :return: bool
+    """
+    return (df['regione_residenza'] == df['regione_erogazione']).all()
+
 
 def feature_selection_execution(df) -> pd.DataFrame:
     '''
@@ -66,4 +86,10 @@ def feature_selection_execution(df) -> pd.DataFrame:
     '''
     df = remove_columns_with_unique_correlation(df)
     df = remove_data_disdetta(df)
+
+    print(f"ATTENZIONE: {check_regione_residenza_equals_regione_erogazione(df)}")
+    # Se le due features hanno sempre valori uguali, rimuovo 'regione_erogazione'
+    if check_regione_residenza_equals_regione_erogazione(df):
+        df = remove_regione_erogazione(df)
+
     return df
