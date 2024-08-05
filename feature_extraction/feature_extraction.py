@@ -8,8 +8,22 @@ def extract_durata_televisita(df):
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce')
     df['ora_fine_erogazione'] = pd.to_datetime(df['ora_fine_erogazione'], errors='coerce')
 
+    # Funzione per calcolare la durata della televisita
+    def calcola_durata(row):
+        """
+        Calcola la durata della televisita in secondi tra 'ora_inizio_erogazione' e 'ora_fine_erogazione'.
+        :param row: Una riga del DataFrame.
+        :return: Durata in secondi.
+        """
+        if pd.notnull(row['ora_inizio_erogazione']) and pd.notnull(row['ora_fine_erogazione']):
+            durata = row['ora_fine_erogazione'] - row['ora_inizio_erogazione']
+            return int(durata.total_seconds()/60)
+        else:
+            return None
+
     # Calcolare la durata in minuti
-    df['durata_televisita'] = (df['ora_fine_erogazione'] - df['ora_inizio_erogazione']).dt.total_seconds() / 60
+    #df['durata_televisita'] = (df['ora_fine_erogazione'] - df['ora_inizio_erogazione']).dt.total_seconds() / 60
+    df['durata_televisita'] = df.apply(calcola_durata, axis=1)
 
     return df
 
