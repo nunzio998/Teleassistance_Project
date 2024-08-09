@@ -51,7 +51,7 @@ def data_transformation(df):
     df = normalize_min_max(df, columns_to_normalize)
 
     # Aggregazione
-    group_by_columns = ['colonna1', 'collonna2']
+    group_by_columns = ['regione_residenza', 'tipologia_servizio', 'tipologia_struttura_erogazione', 'tipologia_professionista_sanitario']
     agg_columns = ['some_numeric_column1', 'some_numeric_column2']
     agg_funcs = ['mean', 'sum']
     df = aggregate_data(df, group_by_columns, agg_columns, agg_funcs)
