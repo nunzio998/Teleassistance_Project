@@ -57,6 +57,7 @@ def remove_data_disdetta(df) -> pd.DataFrame:
     df.drop(columns=['data_disdetta'], inplace=True)
     return df
 
+
 def remove_regione_erogazione(df: pd.DataFrame) -> pd.DataFrame:
     """
     Rimuove la colonna 'regione_erogazione' dal DataFrame.
@@ -64,6 +65,16 @@ def remove_regione_erogazione(df: pd.DataFrame) -> pd.DataFrame:
     :return: df senza la colonna 'regione_erogazione'.
     """
     df.drop(columns=['regione_erogazione'], inplace=True)
+    return df
+
+
+def remove_tipologia_servizio(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rimuove la colonna 'tipologia_servizio' dal DataFrame.
+    :param df:
+    :return: df senza la colonna 'tipologia_servizio'.
+    """
+    df.drop(columns=['tipologia_servizio'], inplace=True)
     return df
 
 
@@ -78,18 +89,35 @@ def check_regione_residenza_equals_regione_erogazione(df: pd.DataFrame) -> pd.Da
     return (df['regione_residenza'] == df['regione_erogazione']).all()
 
 
+def check_tipologia_servizio(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Verifica se 'tipologia_servizio' ha sempre lo stesso valore 'Teleassistenza'.
+    :param df:
+    :return:
+    """
+
+    return (df['tipologia_servizio'] == 'Teleassistenza').all()
+
+
 def feature_selection_execution(df) -> pd.DataFrame:
-    '''
+    """
     Esegue la feature selection
     :param df:
     :return:
-    '''
+    """
     df = remove_columns_with_unique_correlation(df)
     df = remove_data_disdetta(df)
 
     print(f"ATTENZIONE: {check_regione_residenza_equals_regione_erogazione(df)}")
+
     # Se le due features hanno sempre valori uguali, rimuovo 'regione_erogazione'
     if check_regione_residenza_equals_regione_erogazione(df):
         df = remove_regione_erogazione(df)
+
+    print(f"ATTENZIONE: {check_tipologia_servizio(df)}")
+
+    # Se 'tipologia_servizio' ha sempre lo stesso valore, rimuovo la colonna
+    if check_tipologia_servizio(df):
+        df = remove_tipologia_servizio(df)
 
     return df
