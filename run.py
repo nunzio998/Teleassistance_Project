@@ -2,7 +2,7 @@ import pandas as pd
 
 from data_prep.data_cleaning import data_cleaning
 from data_prep.features_selection import feature_selection_execution
-from feature_extraction.feature_extraction import feature_extraction
+from feature_extraction.features_extraction import feature_extraction
 
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'

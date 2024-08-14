@@ -108,13 +108,9 @@ def feature_selection_execution(df) -> pd.DataFrame:
     df = remove_columns_with_unique_correlation(df)
     df = remove_data_disdetta(df)
 
-    print(f"ATTENZIONE: {check_regione_residenza_equals_regione_erogazione(df)}")
-
     # Se le due features hanno sempre valori uguali, rimuovo 'regione_erogazione'
     if check_regione_residenza_equals_regione_erogazione(df):
         df = remove_regione_erogazione(df)
-
-    print(f"ATTENZIONE: {check_tipologia_servizio(df)}")
 
     # Se 'tipologia_servizio' ha sempre lo stesso valore, rimuovo la colonna
     if check_tipologia_servizio(df):
