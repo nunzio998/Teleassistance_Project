@@ -6,7 +6,7 @@ cramjam==2.8.3
 cvxopt==1.3.2
 cvxpy==1.5.2
 cycler==0.12.1
-datawig @ file:///Users/francesco/Documents/Campus%20Biomedico/2%20anno/II%20Semestre/FIA/Progetto/Teleassistance_Project/datawig
+datawig @ /Users/paya/Desktop/Teleassistance_Project
 ecos==2.0.14
 et-xmlfile==1.1.0
 exceptiongroup==1.2.1
