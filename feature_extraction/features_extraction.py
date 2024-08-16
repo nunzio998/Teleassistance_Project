@@ -1,6 +1,6 @@
 from datetime import datetime
 import pandas as pd
-
+import os
 
 def extract_durata_televisita(df):
     # Calcolare la durata della televisita
@@ -70,6 +70,39 @@ def extract_incremento(df):
     # TODO: Implementare la funzione
     return df
 
+def extract_year_and_month(df):
+    '''
+       Questa funzione estrae l'anno e il mese dalla colonna 'data_erogazione' di un DataFrame,
+       crea nuove colonne 'year' e 'month', e poi raggruppa il DataFrame per anno e mese.
+       Ogni gruppo viene salvato in un file Parquet separato nella directory 'month_dataset'.
+       Successivamente, la funzione carica automaticamente tutti i file Parquet nella directory
+       e stampa il contenuto di ciascun file.
+
+       Parametri:
+       df (DataFrame): Il DataFrame originale contenente la colonna 'data_erogazione'.
+
+       Ritorna:
+       DataFrame: Il DataFrame originale con le nuove colonne 'year' e 'month'.
+       '''
+    # Crea nuove colonne 'year' e 'month' estraendo l'anno e il mese dalla colonna 'data_erogazione'
+    df['year'] = df['data_erogazione'].dt.year
+    df['month'] = df['data_erogazione'].dt.month
+
+    # Raggruppa il DataFrame per anno e mese e salva ogni gruppo in un file Parquet separato
+    for (year, month), group in df.groupby(['year', 'month']):
+        output_path = f'month_dataset/challenge_2024_{year}_{month}.parquet'
+        group.to_parquet(output_path, index=False)
+
+    # Caricamento automatico dei file Parquet per ogni anno e mese
+    directory = 'month_dataset'
+    for file_name in os.listdir(directory):
+        if file_name.endswith('.parquet'):
+            file_path = os.path.join(directory, file_name)
+            df = pd.read_parquet(file_path)
+            print(f"Contenuto del file {file_path}:")
+            print(df)
+            print("\n")
+    return df
 
 def feature_extraction(df):
     """
@@ -83,4 +116,6 @@ def feature_extraction(df):
     # Calcolare la durata della televisita
     df = extract_durata_televisita(df)
 
+    # Divisione dataset per anno e mese, e salvataggio in file Parquet
+    df = extract_year_and_month(df)
     return df
