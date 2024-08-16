@@ -26,6 +26,9 @@ def data_cleaning(df) -> pd.DataFrame:
     # Rimozione dei duplicati
     #df = remove_duplicati(df)
 
+    #Ordina le date di erogazione del servizio
+    df = ordina_date(df)
+
     # TODO: stabilire a quali features applicare 'identify_and_remove_outliers' e 'smooth_noisy_data'.
 
     return df
@@ -238,3 +241,15 @@ def check_missing_values_end(df):
     rows_with_end_missing = df[missing_end]
     num_rows_with_end_missing = len(rows_with_end_missing)
     print(f"Numero di righe con 'ora_fine_erogazione' mancante: {num_rows_with_end_missing}")
+
+def ordina_date(df):
+    """
+
+    :param df:
+    :return:
+    """
+    # Assicurati che la colonna delle date sia in formato datetime
+    df['data_erogazione'] = pd.to_datetime(df['data_erogazione'])
+    # Ordina il DataFrame in base alla colonna delle date
+    df= df.sort_values(by='data_erogazione')
+    return df

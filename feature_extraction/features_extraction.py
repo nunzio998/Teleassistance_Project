@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import pandas as pd
 
 
@@ -10,6 +9,7 @@ def extract_durata_televisita(df):
     df['ora_fine_erogazione'] = pd.to_datetime(df['ora_fine_erogazione'], errors='coerce')
 
     # Funzione per calcolare la durata della televisita
+
     def calcola_durata(row):
         """
         Calcola la durata della televisita in secondi tra 'ora_inizio_erogazione' e 'ora_fine_erogazione'.
@@ -28,7 +28,6 @@ def extract_durata_televisita(df):
 
     return df
 
-
 def extract_eta_paziente(df):
     # Assicurarsi che 'data_nascita' sia in formato datetime
     df['data_nascita'] = pd.to_datetime(df['data_nascita'], errors='coerce')
@@ -46,6 +45,18 @@ def extract_eta_paziente(df):
         return age
 
     df['eta_paziente'] = df.apply(calcola_eta, axis=1)
+
+    return df
+
+
+
+
+def extract_timestamp(df):
+    """
+    Estrae il timestamp di quando è avvenuta la visita nel tempo
+    :param df:
+    :return:
+    """
 
     return df
 
@@ -69,7 +80,7 @@ def feature_extraction(df):
 
     # Calcolare l'età del paziente
     df = extract_eta_paziente(df)
-
     # Calcolare la durata della televisita
     df = extract_durata_televisita(df)
+
     return df
