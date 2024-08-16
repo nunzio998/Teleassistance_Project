@@ -90,7 +90,7 @@ def extract_year_and_month(df):
 
     # Raggruppa il DataFrame per anno e mese e salva ogni gruppo in un file Parquet separato
     for (year, month), group in df.groupby(['year', 'month']):
-        output_path = f'month_dataset/challenge_2024_{year}_{month}.parquet'
+        output_path = f'month_dataset/Anno:_{year}_Mese:_{month}.parquet'
         group.to_parquet(output_path, index=False)
 
     # Caricamento automatico dei file Parquet per ogni anno e mese
