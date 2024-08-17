@@ -100,7 +100,6 @@ def extract_year_and_month(df):
             df = pd.read_parquet(file_path)
     return df
 
-
 def conta_professionisti_per_mese(cartella):
     """
     Conta per ogni mese (file Parquet) il numero di volte in cui compare ogni professionista sanitario.
@@ -109,18 +108,10 @@ def conta_professionisti_per_mese(cartella):
     cartella (str): Il percorso della cartella contenente i file Parquet.
 
     Returns:
-    dict: Un dizionario dove le chiavi sono i nomi dei file (mesi) e i valori sono Serie pandas
-          con le tipologie di professionisti e il numero di occorrenze.
+    pd.DataFrame: Un DataFrame contenente il numero di occorrenze per ogni tipologia di professionista
+                  per ogni mese.
     """
-    # Dizionario per contenere i risultati
-    risultati_per_mese = {}
-
-    def extract_tipologia_televisite(df, colonna='tipologia_professionista_sanitario'):
-        """
-        Estrae tutte le tipologie uniche di professionisti sanitari in un DataFrame.
-        """
-        return df[colonna].unique().tolist()
-
+    dati_aggregati = []
     def conta_occorrenze_professionisti(df, colonna='tipologia_professionista_sanitario'):
         """
         Conta il numero di occorrenze di ciascuna tipologia di professionista sanitario in un DataFrame.
@@ -135,18 +126,30 @@ def conta_professionisti_per_mese(cartella):
             # Leggi il file Parquet in un DataFrame
             df = pd.read_parquet(percorso_file)
 
-            # Estrai le tipologie uniche di professionisti sanitari
-            tipologie_uniche = extract_tipologia_televisite(df)
+            # Estrai anno e mese dal nome del file
+            nome_file = os.path.splitext(file)[0]
+            parti_nome = nome_file.split('_')
+            anno = int(parti_nome[1])
+            mese = int(parti_nome[3])
 
             # Conta il numero di occorrenze di ciascuna tipologia
-            conteggio_occorrenze = conta_occorrenze_professionisti(df)
+            conteggio_occorrenze = conta_occorrenze_professionisti(df).reset_index()
+            conteggio_occorrenze.columns = ['tipologia_professionista_sanitario', 'conteggio']
+            conteggio_occorrenze['anno'] = anno
+            conteggio_occorrenze['mese'] = mese
 
-            # Salva il risultato per il mese (nome file senza estensione)
-            nome_mese = os.path.splitext(file)[0]
-            risultati_per_mese[nome_mese] = conteggio_occorrenze
+            # Aggiungi al DataFrame aggregato
+            dati_aggregati.append(conteggio_occorrenze)
 
-    return risultati_per_mese
+    # Concatena tutti i risultati in un unico DataFrame
+    df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
+    pd.set_option('display.max_rows', None)
+    print(df_aggregato)
 
+    # Salva il DataFrame aggregato in un file CSV per un'ulteriore analisi
+    df_aggregato.to_csv('dati_aggregati_professionisti.csv', index=False)
+
+    return df_aggregato
 
 
 def feature_extraction(df):
@@ -161,7 +164,6 @@ def feature_extraction(df):
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
-    risultati_per_mese= conta_professionisti_per_mese('month_dataset')
-    print(risultati_per_mese)
+    conta_professionisti_per_mese('month_dataset')
 
     return df
