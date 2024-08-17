@@ -7,12 +7,6 @@ from feature_extraction.features_extraction import feature_extraction
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
-
-# Visualizzazione del numero di righe e colonne del dataset
-num_rows, num_columns = df.shape
-print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
-
-"""
 #Lavoro sulle prime 100 righe per facilità
 # Modifica temporanea del numero massimo di colonne visualizzate
 # Imposta la larghezza massima della visualizzazione a un valore elevato
@@ -20,16 +14,18 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 df = df.head(100)
-"""
+
+print(df)
+# Visualizzazione del numero di righe e colonne del dataset
+num_rows, num_columns = df.shape
+print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
+
 # Data Cleaning
 df = data_cleaning(df)
-
 # Features Selection
 df = feature_selection_execution(df)
-
 # Feature extraction
 df = feature_extraction(df)
-#print(df)
 df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
 
 # Visualizzazione del numero di righe e colonne del dataset

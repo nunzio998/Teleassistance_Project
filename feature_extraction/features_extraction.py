@@ -72,18 +72,17 @@ def extract_incremento(df):
 
 def extract_year_and_month(df):
     '''
-       Questa funzione estrae l'anno e il mese dalla colonna 'data_erogazione' di un DataFrame,
-       crea nuove colonne 'year' e 'month', e poi raggruppa il DataFrame per anno e mese.
-       Ogni gruppo viene salvato in un file Parquet separato nella directory 'month_dataset'.
-       Successivamente, la funzione carica automaticamente tutti i file Parquet nella directory
-       e stampa il contenuto di ciascun file.
+    Questa funzione estrae l'anno e il mese dalla colonna 'data_erogazione' di un DataFrame,
+    crea nuove colonne 'year' e 'month', e poi raggruppa il DataFrame per anno e mese.
+    Ogni gruppo viene salvato in un file Parquet separato nella directory 'month_dataset'.
+    Successivamente, la funzione carica automaticamente tutti i file Parquet nella directory.
 
-       Parametri:
-       df (DataFrame): Il DataFrame originale contenente la colonna 'data_erogazione'.
+    Parametri:
+    df (DataFrame): Il DataFrame originale contenente la colonna 'data_erogazione'.
 
-       Ritorna:
-       DataFrame: Il DataFrame originale con le nuove colonne 'year' e 'month'.
-       '''
+    Ritorna:
+    DataFrame: Il DataFrame originale con le nuove colonne 'year' e 'month'.
+    '''
     # Crea nuove colonne 'year' e 'month' estraendo l'anno e il mese dalla colonna 'data_erogazione'
     df['year'] = df['data_erogazione'].dt.year
     df['month'] = df['data_erogazione'].dt.month
@@ -99,10 +98,26 @@ def extract_year_and_month(df):
         if file_name.endswith('.parquet'):
             file_path = os.path.join(directory, file_name)
             df = pd.read_parquet(file_path)
-            print(f"Contenuto del file {file_path}:")
-            print(df)
-            print("\n")
     return df
+
+def extract_tipologia_televisite(df):
+    """
+    Legge un DataFrame e restituisce una lista di tutte le tipologie uniche di professionisti sanitari.
+
+    Args:
+    DataFrame (df)
+    Returns:
+    list: Una lista contenente tutte le tipologie uniche di professionisti sanitari.
+    """
+
+    # Estrai tutte le tipologie uniche dalla colonna specificata
+    tipologie_uniche = df['tipologia_professionista_sanitario'].unique().tolist()
+
+    return tipologie_uniche
+
+
+
+
 
 def feature_extraction(df):
     """
@@ -110,12 +125,10 @@ def feature_extraction(df):
     :param df: Il DataFrame originale.
     :return: Il DataFrame con le nuove features.
     """
-
     # Calcolare l'età del paziente
     df = extract_eta_paziente(df)
     # Calcolare la durata della televisita
     df = extract_durata_televisita(df)
-
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
     return df
