@@ -122,7 +122,6 @@ def conta_occorrenze_professionisti(file_parquet):
 
     Args:
     file_parquet (str): Il percorso del file Parquet.
-    colonna (str): Il nome della colonna che contiene le tipologie di professionisti sanitari. Default è 'tipologia_professionista_sanitario'.
 
     Returns:
     pd.Series: Una Serie pandas con le tipologie come indice e il numero di occorrenze come valori.
@@ -149,5 +148,5 @@ def feature_extraction(df):
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
-    
+
     return df
