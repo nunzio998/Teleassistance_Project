@@ -100,39 +100,52 @@ def extract_year_and_month(df):
             df = pd.read_parquet(file_path)
     return df
 
-def extract_tipologia_televisite(df):
+
+def conta_professionisti_per_mese(cartella):
     """
-    Legge un DataFrame e restituisce una lista di tutte le tipologie uniche di professionisti sanitari.
+    Conta per ogni mese (file Parquet) il numero di volte in cui compare ogni professionista sanitario.
 
     Args:
-    DataFrame (df)
-    Returns:
-    list: Una lista contenente tutte le tipologie uniche di professionisti sanitari.
-    """
-
-    # Estrai tutte le tipologie uniche dalla colonna specificata
-    tipologie_uniche = df['tipologia_professionista_sanitario'].unique().tolist()
-
-    return tipologie_uniche
-
-
-def conta_occorrenze_professionisti(file_parquet):
-    """
-    Legge un file Parquet e conta il numero di occorrenze di ciascuna tipologia di professionista sanitario.
-
-    Args:
-    file_parquet (str): Il percorso del file Parquet.
+    cartella (str): Il percorso della cartella contenente i file Parquet.
 
     Returns:
-    pd.Series: Una Serie pandas con le tipologie come indice e il numero di occorrenze come valori.
+    dict: Un dizionario dove le chiavi sono i nomi dei file (mesi) e i valori sono Serie pandas
+          con le tipologie di professionisti e il numero di occorrenze.
     """
-    # Leggi il file Parquet in un DataFrame
-    df = pd.read_parquet(file_parquet)
+    # Dizionario per contenere i risultati
+    risultati_per_mese = {}
 
-    # Conta le occorrenze di ciascuna tipologia nella colonna specificata
-    conteggio_occorrenze = df['tipologia_professionista_sanitario'].value_counts()
+    def extract_tipologia_televisite(df, colonna='tipologia_professionista_sanitario'):
+        """
+        Estrae tutte le tipologie uniche di professionisti sanitari in un DataFrame.
+        """
+        return df[colonna].unique().tolist()
 
-    return conteggio_occorrenze
+    def conta_occorrenze_professionisti(df, colonna='tipologia_professionista_sanitario'):
+        """
+        Conta il numero di occorrenze di ciascuna tipologia di professionista sanitario in un DataFrame.
+        """
+        return df[colonna].value_counts()
+
+    # Scorri tutti i file Parquet nella cartella
+    for file in os.listdir(cartella):
+        if file.endswith(".parquet"):
+            percorso_file = os.path.join(cartella, file)
+
+            # Leggi il file Parquet in un DataFrame
+            df = pd.read_parquet(percorso_file)
+
+            # Estrai le tipologie uniche di professionisti sanitari
+            tipologie_uniche = extract_tipologia_televisite(df)
+
+            # Conta il numero di occorrenze di ciascuna tipologia
+            conteggio_occorrenze = conta_occorrenze_professionisti(df)
+
+            # Salva il risultato per il mese (nome file senza estensione)
+            nome_mese = os.path.splitext(file)[0]
+            risultati_per_mese[nome_mese] = conteggio_occorrenze
+
+    return risultati_per_mese
 
 
 
@@ -148,5 +161,7 @@ def feature_extraction(df):
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
+    risultati_per_mese= conta_professionisti_per_mese('month_dataset')
+    print(risultati_per_mese)
 
     return df
