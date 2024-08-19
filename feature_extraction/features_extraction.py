@@ -1,6 +1,8 @@
 from datetime import datetime
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def extract_durata_televisita(df):
     # Calcolare la durata della televisita
@@ -45,18 +47,6 @@ def extract_eta_paziente(df):
         return age
 
     df['eta_paziente'] = df.apply(calcola_eta, axis=1)
-
-    return df
-
-
-
-
-def extract_timestamp(df):
-    """
-    Estrae il timestamp di quando è avvenuta la visita nel tempo
-    :param df:
-    :return:
-    """
 
     return df
 
@@ -144,12 +134,53 @@ def conta_professionisti_per_mese(cartella):
     # Concatena tutti i risultati in un unico DataFrame
     df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
     pd.set_option('display.max_rows', None)
-    print(df_aggregato)
+    print("Il conteggio di ogni professionista sanitario per mese è", df_aggregato)
 
     # Salva il DataFrame aggregato in un file CSV per un'ulteriore analisi
     df_aggregato.to_csv('dati_aggregati_professionisti.csv', index=False)
 
     return df_aggregato
+
+
+def crea_grafico_mensile_per_anni(df_aggregato, tipologia_professionista):
+    """
+    Crea e visualizza un grafico a barre che mostra la frequenza delle richieste mensili per una specifica tipologia
+    di professionista sanitario per ciascun anno disponibile nel DataFrame.
+
+    Args:
+    df_aggregato (pd.DataFrame): Il DataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
+    tipologia_professionista (str): La tipologia di professionista sanitario per cui creare il grafico (es. 'Infermiere').
+    """
+    # Filtra il DataFrame per la tipologia specificata
+    df_professionista = df_aggregato[df_aggregato['tipologia_professionista_sanitario'] == tipologia_professionista]
+
+    # Assicurati che i mesi siano ordinati da 1 a 12
+    df_professionista = df_professionista.sort_values(by=['mese', 'anno'])
+
+    plt.figure(figsize=(14, 8))
+    sns.barplot(x='mese', y='conteggio', hue='anno', data=df_professionista, palette="coolwarm", dodge=True)
+
+    # Aggiungi i valori sopra le barre
+    for p in plt.gca().patches:
+        plt.gca().annotate(f'{int(p.get_height())}',
+                           (p.get_x() + p.get_width() / 2., p.get_height()),
+                           ha='center', va='baseline',
+                           fontsize=10, color='black', xytext=(0, 5),
+                           textcoords='offset points')
+
+    # Configurazione delle etichette
+    plt.title(f'Richieste Mensili per {tipologia_professionista}', fontsize=20, weight='bold')
+    plt.xlabel('Mese', fontsize=14)
+    plt.ylabel('Numero di Richieste', fontsize=14)
+    plt.xticks(range(12), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+               fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.show()
+
+
+
 
 
 def feature_extraction(df):
@@ -164,6 +195,9 @@ def feature_extraction(df):
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
-    conta_professionisti_per_mese('month_dataset')
+    df_aggregato = conta_professionisti_per_mese('month_dataset')
 
+    tipologia = 'Infermiere'  # Puoi sostituire 'Infermiere' con qualsiasi altra tipologia disponibile
+    crea_grafico_mensile_per_anni(df_aggregato, tipologia)
+    
     return df
