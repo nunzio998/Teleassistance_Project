@@ -180,6 +180,39 @@ def crea_grafico_mensile_per_anni(df_aggregato, tipologia_professionista):
     plt.show()
 
 
+def crea_istogrammi_mensili_per_anni(df_aggregato, tipologia_professionista):
+    """
+    Crea e visualizza un grafico a barre che mostra la frequenza delle richieste mensili per una specifica tipologia
+    di professionista sanitario per ciascun anno disponibile nel DataFrame.
+
+    Args:
+    df_aggregato (pd.DataFrame): Il DataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
+    tipologia_professionista (str): La tipologia di professionista sanitario per cui creare i grafici (es. 'Infermiere').
+    """
+    # Filtra il DataFrame per la tipologia specificata
+    df_professionista = df_aggregato[df_aggregato['tipologia_professionista_sanitario'] == tipologia_professionista]
+
+    # Estrai gli anni disponibili nel DataFrame
+    anni = df_professionista['anno'].unique()
+
+    # Creazione di un plot per ciascun anno
+    for anno in anni:
+        df_anno = df_professionista[df_professionista['anno'] == anno]
+
+        plt.figure(figsize=(14, 8))
+        sns.histplot(data=df_anno, x='mese', weights='conteggio', bins=12, kde=False, color='skyblue', discrete=True)
+
+        # Configurazione delle etichette
+        plt.title(f'Frequenza delle Richieste Mensili per {tipologia_professionista} - Anno {anno}', fontsize=20,
+                  weight='bold')
+        plt.xlabel('Mese', fontsize=14)
+        plt.ylabel('Frequenza', fontsize=14)
+        plt.xticks(range(1, 13), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                   fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.grid(True, linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+        plt.show()
 
 
 
@@ -199,5 +232,7 @@ def feature_extraction(df):
 
     tipologia = 'Infermiere'  # Puoi sostituire 'Infermiere' con qualsiasi altra tipologia disponibile
     crea_grafico_mensile_per_anni(df_aggregato, tipologia)
-    
+    crea_istogrammi_mensili_per_anni(df_aggregato, tipologia)
+
+
     return df
