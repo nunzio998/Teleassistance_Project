@@ -88,6 +88,69 @@ def extract_year_and_month(df):
             df = pd.read_parquet(file_path)
     return df
 
+
+import os
+import pandas as pd
+
+
+def calcola_quadrimestre(mese):
+    """
+    Assegna un quadrimestre ai mesi dell'anno.
+    1-4 -> Quadrimestre 1
+    5-8 -> Quadrimestre 2
+    9-12 -> Quadrimestre 3
+    """
+    if 1 <= mese <= 4:
+        return 1
+    elif 5 <= mese <= 8:
+        return 2
+    elif 9 <= mese <= 12:
+        return 3
+    else:
+        raise ValueError("Il valore del mese deve essere compreso tra 1 e 12")
+
+
+def raggruppa_per_quadrimestre(cartella):
+    """
+    Raggruppa i file Parquet per quadrimestre e salva un file Parquet per ogni quadrimestre.
+
+    Args: cartella (str): Il percorso della cartella contenente i file Parquet.
+
+    Returns: None
+    """
+    # Dizionario per raccogliere i dati per ogni quadrimestre
+    dati_per_quadrimestre = {}
+
+    for file in os.listdir(cartella):
+        if file.endswith(".parquet"):
+            percorso_file = os.path.join(cartella, file)
+            df = pd.read_parquet(percorso_file)
+
+            # Estrai anno e mese dal nome del file
+            nome_file = os.path.splitext(file)[0]
+            parti_nome = nome_file.split('_')
+            anno = int(parti_nome[1])
+            mese = int(parti_nome[3])
+
+            # Calcola il quadrimestre
+            quadrimestre = calcola_quadrimestre(mese)
+
+            # Crea una chiave per l'anno e il quadrimestre
+            chiave = (anno, quadrimestre)
+
+            # Aggiungi i dati al dizionario
+            if chiave not in dati_per_quadrimestre:
+                dati_per_quadrimestre[chiave] = []
+
+            dati_per_quadrimestre[chiave].append(df)
+
+    # Combina i dati per ciascun quadrimestre e salva un file Parquet
+    for (anno, quadrimestre), liste_dati in dati_per_quadrimestre.items():
+        df_quadrimestrale = pd.concat(liste_dati, ignore_index=True)
+        output_path = os.path.join(cartella, f'Anno_{anno}_Quadrimestre_{quadrimestre}.parquet')
+        df_quadrimestrale.to_parquet(output_path, index=False)
+        print(f"File salvato: {output_path}")
+
 def conta_occorrenze_professionisti(df, colonne=['tipologia_professionista_sanitario']):
     """
     Conta il numero di occorrenze per le combinazioni di valori nelle colonne specificate.
@@ -162,5 +225,6 @@ def feature_extraction(df):
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
+    raggruppa_per_quadrimestre('month_dataset')
 
     return df
