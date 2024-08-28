@@ -39,6 +39,37 @@ def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, t
     plt.savefig(os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png'))
     plt.close()
 
+def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
+    """
+    Crea e salva gli istogrammi annuali per una specifica tipologia di professionista sanitario.
+
+    Args:
+    df_professionista (pd.DataFrame): Il DataFrame filtrato per la tipologia specificata.
+    tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
+    tipologia_dir (str): La directory dove salvare i grafici.
+    """
+    # Estrai gli anni disponibili nel DataFrame
+    anni = df_professionista['anno'].unique()
+
+    # Creazione di un plot per ciascun anno
+    for anno in anni:
+        df_anno = df_professionista[df_professionista['anno'] == anno]
+
+        plt.figure(figsize=(14, 8))
+        sns.histplot(data=df_anno, x='mese', weights='conteggio', bins=12, kde=False, color='skyblue', discrete=True)
+
+        # Configurazione delle etichette
+        plt.title(f'Frequenza delle Richieste Mensili per {tipologia_professionista} - Anno {anno}', fontsize=20,
+                  weight='bold')
+        plt.xlabel('Mese', fontsize=14)
+        plt.ylabel('Frequenza', fontsize=14)
+        plt.xticks(range(1, 13), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                   fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.grid(True, linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+        plt.savefig(os.path.join(tipologia_dir, f'istogramma_{tipologia_professionista}anno{anno}.png'))
+        plt.close()
 
 def diagrams():
     return None
