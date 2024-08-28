@@ -90,6 +90,20 @@ def extract_year_and_month(df):
             df = pd.read_parquet(file_path)
     return df
 
+def conta_occorrenze_professionisti(df, colonne=['tipologia_professionista_sanitario']):
+    """
+    Conta il numero di occorrenze per le combinazioni di valori nelle colonne specificate.
+
+    Args:
+    df (pd.DataFrame): Il DataFrame su cui effettuare il conteggio.
+    colonne (list): Una lista delle colonne su cui raggruppare i dati per il conteggio.
+
+    Returns:
+    pd.DataFrame: Un DataFrame con il conteggio delle occorrenze per ogni combinazione delle colonne specificate.
+    """
+    return df.groupby(colonne).size().reset_index(name='conteggio')
+
+
 def conta_professionisti_per_mese(cartella):
     """
     Conta per ogni mese (file Parquet) il numero di volte in cui compare ogni professionista sanitario.
@@ -102,45 +116,39 @@ def conta_professionisti_per_mese(cartella):
                   per ogni mese.
     """
     dati_aggregati = []
-    def conta_occorrenze_professionisti(df, colonna='tipologia_professionista_sanitario'):
-        """
-        Conta il numero di occorrenze di ciascuna tipologia di professionista sanitario in un DataFrame.
-        """
-        return df[colonna].value_counts()
-
-    # Scorri tutti i file Parquet nella cartella
     for file in os.listdir(cartella):
         if file.endswith(".parquet"):
             percorso_file = os.path.join(cartella, file)
-
-            # Leggi il file Parquet in un DataFrame
             df = pd.read_parquet(percorso_file)
-
-            # Estrai anno e mese dal nome del file
             nome_file = os.path.splitext(file)[0]
             parti_nome = nome_file.split('_')
             anno = int(parti_nome[1])
             mese = int(parti_nome[3])
-
-            # Conta il numero di occorrenze di ciascuna tipologia
-            conteggio_occorrenze = conta_occorrenze_professionisti(df).reset_index()
-            conteggio_occorrenze.columns = ['tipologia_professionista_sanitario', 'conteggio']
+            conteggio_occorrenze = conta_occorrenze_professionisti(df, colonne=['tipologia_professionista_sanitario'])
             conteggio_occorrenze['anno'] = anno
             conteggio_occorrenze['mese'] = mese
-
-            # Aggiungi al DataFrame aggregato
             dati_aggregati.append(conteggio_occorrenze)
 
-    # Concatena tutti i risultati in un unico DataFrame
     df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
-    pd.set_option('display.max_rows', None)
-    print("Il conteggio di ogni professionista sanitario per mese è", df_aggregato)
-
-    # Salva il DataFrame aggregato in un file CSV per un'ulteriore analisi
-    df_aggregato.to_csv('dati_aggregati_professionisti.csv', index=False)
-
+    df_aggregato.to_csv('dati_aggregati_professionisti_per_mese.csv', index=False)
     return df_aggregato
 
+def conta_professionisti_per_sesso(cartella):
+    dati_aggregati = []
+    for file in os.listdir(cartella):
+        if file.endswith(".parquet"):
+            percorso_file = os.path.join(cartella, file)
+            df = pd.read_parquet(percorso_file)
+            nome_file = os.path.splitext(file)[0]
+            parti_nome = nome_file.split('_')
+            anno = int(parti_nome[1])
+            conteggio_occorrenze = conta_occorrenze_professionisti(df, colonne=['sesso', 'tipologia_professionista_sanitario'])
+            conteggio_occorrenze['anno'] = anno
+            dati_aggregati.append(conteggio_occorrenze)
+
+    df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
+    df_aggregato.to_csv('dati_aggregati_professionisti_per_sesso.csv', index=False)
+    return df_aggregato
 
 def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
@@ -166,6 +174,17 @@ def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, t
     plt.savefig(os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png'))
     plt.close()
 
+def crea_grafico_sesso_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
+    plt.figure(figsize=(14, 8))
+    sns.barplot(x='sesso', y='conteggio', hue='anno', data=df_professionista, palette="coolwarm", dodge=True)
+    plt.title(f'Richieste per {tipologia_professionista} in base al Sesso', fontsize=20, weight='bold')
+    plt.xlabel('Sesso', fontsize=14)
+    plt.ylabel('Numero di Richieste', fontsize=14)
+    plt.yticks(fontsize=12)
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(os.path.join(tipologia_dir, f'grafico_sesso_{tipologia_professionista}.png'))
+    plt.close()
 
 def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
@@ -176,8 +195,6 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
     tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
     tipologia_dir (str): La directory dove salvare i grafici.
     """
-
-
     # Estrai gli anni disponibili nel DataFrame
     anni = df_professionista['anno'].unique()
 
@@ -201,7 +218,7 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
         plt.savefig(os.path.join(tipologia_dir, f'istogramma_{tipologia_professionista}_anno_{anno}.png'))
         plt.close()
 
-def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
+def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti',tipo='mese'):
     """
     Crea e salva grafici a barre e istogrammi per ogni tipologia di professionista sanitario.
 
@@ -225,18 +242,14 @@ def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
         if not os.path.exists(tipologia_dir):
             os.makedirs(tipologia_dir)
 
-        # Filtrare il DataFrame per la tipologia specificata
         df_professionista = df_aggregato[df_aggregato['tipologia_professionista_sanitario'] == tipologia]
 
-        # Assicurarsi che i mesi siano ordinati da 1 a 12
-        df_professionista = df_professionista.sort_values(by=['mese', 'anno'])
-
-        # Creare e salvare il grafico a barre
-        crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
-
-        # Creare e salvare gli istogrammi per ogni anno
-        crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
-
+        if tipo == 'mese':
+            df_professionista = df_professionista.sort_values(by=['mese', 'anno'])
+            crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
+            crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
+        elif tipo == 'sesso':
+            crea_grafico_sesso_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
 
 def feature_extraction(df):
     """
@@ -250,7 +263,11 @@ def feature_extraction(df):
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
+
     df_aggregato = conta_professionisti_per_mese('month_dataset')
-    crea_grafici_e_salva(df_aggregato)
+    crea_grafici_e_salva(df_aggregato,output_dir='grafici_professionisti_mese', tipo='mese')
+
+    df_aggregato_sesso = conta_professionisti_per_sesso('month_dataset')
+    crea_grafici_e_salva(df_aggregato_sesso, output_dir='grafici_professionisti_per_sesso', tipo='sesso')
 
     return df
