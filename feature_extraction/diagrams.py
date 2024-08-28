@@ -70,6 +70,42 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
         plt.tight_layout()
         plt.savefig(os.path.join(tipologia_dir, f'istogramma_{tipologia_professionista}anno{anno}.png'))
         plt.close()
+def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti',tipo='mese'):
+    """
+    Crea e salva grafici a barre e istogrammi per ogni tipologia di professionista sanitario.
+
+    Args:
+    df_aggregato (pd.DataFrame): Il DataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
+    output_dir (str): La directory principale dove salvare i grafici.
+    """
+    # Creare la cartella principale se non esiste
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Ottenere tutte le tipologie di professionisti sanitari
+    tipologie = df_aggregato['tipologia_professionista_sanitario'].unique()
+
+    for tipologia in tipologie:
+        # Sostituire i caratteri non validi nei nomi delle cartelle
+        tipologia_professionista = tipologia.replace('/', '_')
+
+        # Creare una sottocartella per ogni tipologia
+        tipologia_dir = os.path.join(output_dir, tipologia_professionista)
+        if not os.path.exists(tipologia_dir):
+            os.makedirs(tipologia_dir)
+        df_professionista = df_aggregato[df_aggregato['tipologia_professionista_sanitario'] == tipologia]
+
+        if tipo == 'mese':
+            df_professionista = df_professionista.sort_values(by=['mese', 'anno'])
+            crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
+            crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
+        elif tipo == 'sesso':
+            crea_grafico_sesso_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
+
 
 def diagrams():
+    df_aggregato = conta_professionisti_per_mese('month_dataset')
+    crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti_mese', tipo='mese')
+    df_aggregato_sesso = conta_professionisti_per_sesso('month_dataset')
+    crea_grafici_e_salva(df_aggregato_sesso, output_dir='grafici_professionisti_per_sesso', tipo='sesso')
     return None
