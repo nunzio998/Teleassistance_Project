@@ -134,7 +134,6 @@ def conta_professionisti_per_mese(cartella):
     # Concatena tutti i risultati in un unico DataFrame
     df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
     pd.set_option('display.max_rows', None)
-    print("Il conteggio di ogni professionista sanitario per mese è", df_aggregato)
 
     # Salva il DataFrame aggregato in un file CSV per un'ulteriore analisi
     df_aggregato.to_csv('dati_aggregati_professionisti.csv', index=False)
