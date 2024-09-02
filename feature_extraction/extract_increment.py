@@ -1,5 +1,31 @@
 import pandas as pd
 
+
+def calcola_incremento_percentuale(df, anno1, anno2, mesi, tipologia):
+    """
+    Calcola l'incremento percentuale delle televisite tra due anni per una tipologia di professionista sanitario
+    specificata in un intervallo di mesi.
+
+    Args:
+    df (pd.DataFrame): Il DataFrame contenente i dati mensili per ogni tipologia e anno.
+    anno1 (int): Il primo anno per il confronto.
+    anno2 (int): Il secondo anno per il confronto.
+    mesi (list): Lista dei mesi di interesse.
+    tipologia (str): La tipologia di professionista sanitario di cui calcolare l'incremento percentuale.
+
+    Returns:
+    float: L'incremento percentuale tra i due anni per la tipologia specificata.
+    """
+    # Ottenere i conteggi per gli anni specificati
+    conteggi = conta_televisite_per_mesi(df, [anno1, anno2], mesi, tipologia)
+
+    # Calcolare il conteggio per i due anni
+    conteggio_anno1 = conteggi.get(anno1, 0)
+    conteggio_anno2 = conteggi.get(anno2, 0)
+
+    # Calcolare l'incremento percentuale
+    incremento = ((conteggio_anno2 - conteggio_anno1) / conteggio_anno1) * 100 if conteggio_anno1 > 0 else float('inf')
+    return incremento
 def salva_incremento_percentuale_per_intervalli(df, tipologie, intervalli_anni_mesi, output_file):
     """
     Calcola e salva l'incremento percentuale delle televisite per vari intervalli di mesi e anni,
