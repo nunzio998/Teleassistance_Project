@@ -1,6 +1,29 @@
 import pandas as pd
 
 
+def conta_televisite_per_mesi(df, anni, mesi, tipologia):
+    """
+    Conta il numero totale di televisite per una tipologia di professionista sanitario specificata,
+    in un intervallo di mesi e anni.
+
+    Args:
+    df (pd.DataFrame): Il DataFrame contenente i dati mensili per ogni tipologia e anno.
+    anni (list): Lista degli anni di interesse.
+    mesi (list): Lista dei mesi di interesse.
+    tipologia (str): La tipologia di professionista sanitario di cui calcolare le televisite.
+
+    Returns:
+    dict: Un dizionario con gli anni come chiavi e il totale delle televisite per quell'anno come valori.
+    """
+    # Filtrare il DataFrame per includere solo gli anni e i mesi specificati
+    df_filtered = df[(df['anno'].isin(anni)) & (df['mese'].isin(mesi))]
+
+    # Filtrare ulteriormente per la tipologia di professionista sanitario specificata
+    df_professionista = df_filtered[df_filtered['tipologia_professionista_sanitario'].str.lower() == tipologia.lower()]
+
+    # Calcolare la somma delle televisite per ciascun anno
+    return {anno: df_professionista[df_professionista['anno'] == anno]['conteggio'].sum() for anno in anni}
+
 def calcola_incremento_percentuale(df, anno1, anno2, mesi, tipologia):
     """
     Calcola l'incremento percentuale delle televisite tra due anni per una tipologia di professionista sanitario
