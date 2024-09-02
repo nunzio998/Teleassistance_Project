@@ -51,14 +51,6 @@ def extract_eta_paziente(df):
     return df
 
 
-def extract_incremento(df):
-    """
-    Aggiunge una nuova feature al DataFrame: incremento.
-    :param df:
-    :return:
-    """
-    # TODO: Implementare la funzione
-    return df
 
 def extract_year_and_month(df):
     '''
@@ -134,9 +126,6 @@ def conta_professionisti_per_mese(cartella):
     # Concatena tutti i risultati in un unico DataFrame
     df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
     pd.set_option('display.max_rows', None)
-
-    # Salva il DataFrame aggregato in un file CSV per un'ulteriore analisi
-    df_aggregato.to_csv('dati_aggregati_professionisti.csv', index=False)
 
     return df_aggregato
 
@@ -251,5 +240,7 @@ def feature_extraction(df):
     df = extract_year_and_month(df)
     df_aggregato = conta_professionisti_per_mese('month_dataset')
     crea_grafici_e_salva(df_aggregato)
+    # Salva il DataFrame aggregato in un file Parquet per ulteriori analisi
+    df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)
 
     return df
