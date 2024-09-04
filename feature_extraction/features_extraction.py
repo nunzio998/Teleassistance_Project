@@ -1,6 +1,8 @@
 from datetime import datetime
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def extract_durata_televisita(df):
     # Calcolare la durata della televisita
@@ -89,82 +91,6 @@ def extract_year_and_month(df):
     return df
 
 
-import os
-import pandas as pd
-
-
-def calcola_quadrimestre(mese):
-    """
-    Assegna un quadrimestre ai mesi dell'anno.
-    1-4 -> Quadrimestre 1
-    5-8 -> Quadrimestre 2
-    9-12 -> Quadrimestre 3
-    """
-    if 1 <= mese <= 4:
-        return 1
-    elif 5 <= mese <= 8:
-        return 2
-    elif 9 <= mese <= 12:
-        return 3
-    else:
-        raise ValueError("Il valore del mese deve essere compreso tra 1 e 12")
-
-
-def raggruppa_per_quadrimestre(cartella):
-    """
-    Raggruppa i file Parquet per quadrimestre e salva un file Parquet per ogni quadrimestre.
-
-    Args: cartella (str): Il percorso della cartella contenente i file Parquet.
-
-    Returns: None
-    """
-    # Dizionario per raccogliere i dati per ogni quadrimestre
-    dati_per_quadrimestre = {}
-
-    for file in os.listdir(cartella):
-        if file.endswith(".parquet"):
-            percorso_file = os.path.join(cartella, file)
-            df = pd.read_parquet(percorso_file)
-
-            # Estrai anno e mese dal nome del file
-            nome_file = os.path.splitext(file)[0]
-            parti_nome = nome_file.split('_')
-            anno = int(parti_nome[1])
-            mese = int(parti_nome[3])
-
-            # Calcola il quadrimestre
-            quadrimestre = calcola_quadrimestre(mese)
-
-            # Crea una chiave per l'anno e il quadrimestre
-            chiave = (anno, quadrimestre)
-
-            # Aggiungi i dati al dizionario
-            if chiave not in dati_per_quadrimestre:
-                dati_per_quadrimestre[chiave] = []
-
-            dati_per_quadrimestre[chiave].append(df)
-
-    # Combina i dati per ciascun quadrimestre e salva un file Parquet
-    for (anno, quadrimestre), liste_dati in dati_per_quadrimestre.items():
-        df_quadrimestrale = pd.concat(liste_dati, ignore_index=True)
-        output_path = os.path.join(cartella, f'Anno_{anno}_Quadrimestre_{quadrimestre}.parquet')
-        df_quadrimestrale.to_parquet(output_path, index=False)
-        print(f"File salvato: {output_path}")
-
-def conta_occorrenze_professionisti(df, colonne=['tipologia_professionista_sanitario']):
-    """
-    Conta il numero di occorrenze per le combinazioni di valori nelle colonne specificate.
-
-    Args:
-    df (pd.DataFrame): Il DataFrame su cui effettuare il conteggio.
-    colonne (list): Una lista delle colonne su cui raggruppare i dati per il conteggio.
-
-    Returns:
-    pd.DataFrame: Un DataFrame con il conteggio delle occorrenze per ogni combinazione delle colonne specificate.
-    """
-    return df.groupby(colonne).size().reset_index(name='conteggio')
-
-
 def conta_professionisti_per_mese(cartella):
     """
     Conta per ogni mese (file Parquet) il numero di volte in cui compare ogni professionista sanitario.
@@ -177,41 +103,95 @@ def conta_professionisti_per_mese(cartella):
                   per ogni mese.
     """
     dati_aggregati = []
+    def conta_occorrenze_professionisti(df, colonna='tipologia_professionista_sanitario'):
+        """
+        Conta il numero di occorrenze di ciascuna tipologia di professionista sanitario in un DataFrame.
+        """
+        return df[colonna].value_counts()
+    # Scorri tutti i file Parquet nella cartella
     for file in os.listdir(cartella):
         if file.endswith(".parquet"):
             percorso_file = os.path.join(cartella, file)
+
+            # Leggi il file Parquet in un DataFrame
             df = pd.read_parquet(percorso_file)
+
+            # Estrai anno e mese dal nome del file
             nome_file = os.path.splitext(file)[0]
             parti_nome = nome_file.split('_')
             anno = int(parti_nome[1])
             mese = int(parti_nome[3])
-            conteggio_occorrenze = conta_occorrenze_professionisti(df, colonne=['tipologia_professionista_sanitario'])
+
+            # Conta il numero di occorrenze di ciascuna tipologia
+            conteggio_occorrenze = conta_occorrenze_professionisti(df).reset_index()
+            conteggio_occorrenze.columns = ['tipologia_professionista_sanitario', 'conteggio']
             conteggio_occorrenze['anno'] = anno
             conteggio_occorrenze['mese'] = mese
-            dati_aggregati.append(conteggio_occorrenze)
 
+            # Aggiungi al DataFrame aggregato
+            dati_aggregati.append(conteggio_occorrenze)
+    # Concatena tutti i risultati in un unico DataFrame
     df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
-    df_aggregato.to_csv('dati_aggregati_professionisti_per_mese.csv', index=False)
+    pd.set_option('display.max_rows', None)
+
     return df_aggregato
 
-def conta_professionisti_per_sesso(cartella):
-    dati_aggregati = []
-    for file in os.listdir(cartella):
-        if file.endswith(".parquet"):
-            percorso_file = os.path.join(cartella, file)
-            df = pd.read_parquet(percorso_file)
-            nome_file = os.path.splitext(file)[0]
-            parti_nome = nome_file.split('_')
-            anno = int(parti_nome[1])
-            conteggio_occorrenze = conta_occorrenze_professionisti(df, colonne=['sesso', 'tipologia_professionista_sanitario'])
-            conteggio_occorrenze['anno'] = anno
-            dati_aggregati.append(conteggio_occorrenze)
+def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
+    """
+       Crea e salva il grafico a barre mensile per una specifica tipologia di professionista sanitario.
 
-    df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
-    df_aggregato.to_csv('dati_aggregati_professionisti_per_sesso.csv', index=False)
-    return df_aggregato
+       Args:
+       df_professionista (pd.DataFrame): Il DataFrame filtrato per la tipologia specificata.
+       tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
+       tipologia_dir (str): La directory dove salvare i grafici.
+       """
+    plt.figure(figsize=(14, 8))
+    sns.barplot(x='mese', y='conteggio', hue='anno', data=df_professionista, palette="coolwarm", dodge=True)
 
+    # Configurazione delle etichette
+    plt.title(f'Richieste Mensili per {tipologia_professionista}', fontsize=20, weight='bold')
+    plt.xlabel('Mese', fontsize=14)
+    plt.ylabel('Numero di Richieste', fontsize=14)
+    plt.xticks(range(12), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+               fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png'))
+    plt.close()
 
+def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
+    """
+    Crea e salva gli istogrammi annuali per una specifica tipologia di professionista sanitario.
+
+    Args:
+    df_professionista (pd.DataFrame): Il DataFrame filtrato per la tipologia specificata.
+    tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
+    tipologia_dir (str): La directory dove salvare i grafici.
+    """
+    # Estrai gli anni disponibili nel DataFrame
+    anni = df_professionista['anno'].unique()
+
+    # Creazione di un plot per ciascun anno
+    for anno in anni:
+        df_anno = df_professionista[df_professionista['anno'] == anno]
+
+        plt.figure(figsize=(14, 8))
+        sns.histplot(data=df_anno, x='mese', weights='conteggio', bins=12, kde=False, color='skyblue', discrete=True)
+
+        # Configurazione delle etichette
+        plt.title(f'Frequenza delle Richieste Mensili per {tipologia_professionista} - Anno {anno}', fontsize=20,
+                  weight='bold')
+        plt.xlabel('Mese', fontsize=14)
+        plt.ylabel('Frequenza', fontsize=14)
+        plt.xticks(range(1, 13), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                   fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.grid(True, linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+        plt.savefig(os.path.join(tipologia_dir, f'istogramma_{tipologia_professionista}anno{anno}.png'))
+
+        plt.close()
 
 def feature_extraction(df):
     """
@@ -225,6 +205,7 @@ def feature_extraction(df):
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
-    raggruppa_per_quadrimestre('month_dataset')
-
+    df_aggregato = conta_professionisti_per_mese('month_dataset')
+    # Salva il DataFrame aggregato in un file Parquet per ulteriori analisi
+    df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)
     return df
