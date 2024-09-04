@@ -49,6 +49,29 @@ def calcola_incremento_percentuale(df, anno1, anno2, mesi, tipologia):
     # Calcolare l'incremento percentuale
     incremento = ((conteggio_anno2 - conteggio_anno1) / conteggio_anno1) * 100 if conteggio_anno1 > 0 else float('inf')
     return incremento
+
+
+def classifica_incremento(percentuale):
+    """
+    Classifica l'incremento in base alla percentuale.
+
+    Args: percentuale (float): La percentuale di incremento da classificare.
+
+    Returns:
+    str: La classificazione dell'incremento ('alta', 'media', 'costante', 'bassa').
+    """
+    if percentuale > 100:
+        return 'alta'
+    elif 50 < percentuale <= 100:
+        return 'media'
+    elif 0 <= percentuale <= 50:
+        return 'costante'
+    elif percentuale < 0:
+        return 'bassa'
+    else:
+        return 'media'  # Per valori tra 1% e 50%, assumiamo 'media'.
+
+
 def salva_incremento_percentuale_per_intervalli(df, tipologie, intervalli_anni_mesi, output_file):
     """
     Calcola e salva l'incremento percentuale delle televisite per vari intervalli di mesi e anni,
@@ -65,11 +88,13 @@ def salva_incremento_percentuale_per_intervalli(df, tipologie, intervalli_anni_m
         for (anno1, anno2, mesi) in intervalli_anni_mesi:
             # Calcolare l'incremento percentuale
             incremento = calcola_incremento_percentuale(df, anno1, anno2, mesi, tipologia)
+            classificazione = classifica_incremento(incremento)
             risultati.append({
                 'tipologia': tipologia,
                 'mesi': f"{mesi[0]},{mesi[-1]}",
                 'anno': f"{anno1},{anno2}",
-                'percentuale': incremento
+                'percentuale': incremento,
+                'incremento': classificazione
             })
     # Creare un DataFrame con i risultati
     df_risultati = pd.DataFrame(risultati)
@@ -101,3 +126,21 @@ def incremento():
     # Salva l'incremento percentuale per i vari intervalli di mesi e anni per ogni tipologia di professionista sanitario in un file Parquet
     output_file = 'datasets/incremento_percentuale.parquet'
     salva_incremento_percentuale_per_intervalli(df_aggregato, tipologie, intervalli_anni_mesi, output_file)
+    file_incremento = pd.read_parquet(output_file)
+    print(file_incremento.head(30))
+
+"""
+    tipologia  mesi       anno  percentuale
+0  Infermiere   1,4  2019,2020   115.818092
+1  Infermiere   5,8  2019,2020    38.422351
+2  Infermiere  9,12  2019,2020    79.069648
+3  Infermiere   1,4  2020,2021    51.094824
+4  Infermiere   5,8  2020,2021     7.337388
+5  Infermiere  9,12  2020,2021   -30.465416
+6  Infermiere   1,4  2021,2022   -31.421295
+7  Infermiere   5,8  2021,2022   -16.122280
+8  Infermiere  9,12  2021,2022    -8.365598
+9   Psicologo   1,4  2019,2020   140.305149
+
+"""
+

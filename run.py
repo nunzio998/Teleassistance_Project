@@ -33,6 +33,8 @@ df = feature_extraction(df)
 # Crea file parquet con incremento quadrimestrale per ogni professonista sanitario
 incremento()
 
+
+
 # Visualizzazione del numero di righe e colonne del dataset
 num_rows, num_columns = df.shape
 print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")

@@ -277,7 +277,9 @@ def feature_extraction(df):
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
     df_aggregato = conta_professionisti_per_mese('month_dataset')
-    crea_grafici_e_salva(df_aggregato)
+
+    #crea_grafici_e_salva(df_aggregato)
+
     # Salva il DataFrame aggregato in un file Parquet per ulteriori analisi
     df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)
     return df
