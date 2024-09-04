@@ -92,9 +92,6 @@ def extract_year_and_month(df):
         # Se il file esiste, salta la creazione
         if not os.path.isfile(output_path):
             group.to_parquet(output_path, index=False)
-            print(f"File '{output_path}' creato.")
-        else:
-            print(f"File '{output_path}' esiste già. Salto la creazione.")
 
     for file_name in os.listdir(directory):
         if file_name.endswith('.parquet'):
@@ -151,27 +148,38 @@ def conta_professionisti_per_mese(cartella):
 
 def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
-       Crea e salva il grafico a barre mensile per una specifica tipologia di professionista sanitario.
+    Crea e salva il grafico a barre mensile per una specifica tipologia di professionista sanitario.
 
-       Args:
-       df_professionista (pd.DataFrame): Il DataFrame filtrato per la tipologia specificata.
-       tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
-       tipologia_dir (str): La directory dove salvare i grafici.
-       """
-    plt.figure(figsize=(14, 8))
-    sns.barplot(x='mese', y='conteggio', hue='anno', data=df_professionista, palette="coolwarm", dodge=True)
+    Args:
+    df_professionista (pd.DataFrame): Il DataFrame filtrato per la tipologia specificata.
+    tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
+    tipologia_dir (str): La directory dove salvare i grafici.
+    """
+    # Percorso del file del grafico
+    output_path = os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png')
 
-    # Configurazione delle etichette
-    plt.title(f'Richieste Mensili per {tipologia_professionista}', fontsize=20, weight='bold')
-    plt.xlabel('Mese', fontsize=14)
-    plt.ylabel('Numero di Richieste', fontsize=14)
-    plt.xticks(range(12), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
-               fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.grid(True, linestyle='--', linewidth=0.5)
-    plt.tight_layout()
-    plt.savefig(os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png'))
-    plt.close()
+    # Verifica se il file esiste già
+    if not os.path.isfile(output_path):
+        plt.figure(figsize=(14, 8))
+        sns.barplot(x='mese', y='conteggio', hue='anno', data=df_professionista, palette="coolwarm", dodge=True)
+
+        # Configurazione delle etichette
+        plt.title(f'Richieste Mensili per {tipologia_professionista}', fontsize=20, weight='bold')
+        plt.xlabel('Mese', fontsize=14)
+        plt.ylabel('Numero di Richieste', fontsize=14)
+        plt.xticks(range(12), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                   fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.grid(True, linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+
+        # Salva il grafico
+        plt.savefig(output_path)
+        plt.close()
+        print(f"Grafico mensile salvato in '{output_path}'.")
+
+
+
 
 def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
@@ -189,6 +197,14 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
     for anno in anni:
         df_anno = df_professionista[df_professionista['anno'] == anno]
 
+        # Percorso del file dell'istogramma
+        output_path = os.path.join(tipologia_dir, f'istogramma_{tipologia_professionista}_anno{anno}.png')
+
+        # Verifica se il file esiste già PRIMA di fare qualsiasi operazione
+        if os.path.isfile(output_path):
+            continue
+
+        # Creazione dell'istogramma
         plt.figure(figsize=(14, 8))
         sns.histplot(data=df_anno, x='mese', weights='conteggio', bins=12, kde=False, color='skyblue', discrete=True)
 
@@ -202,9 +218,12 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
         plt.yticks(fontsize=12)
         plt.grid(True, linestyle='--', linewidth=0.5)
         plt.tight_layout()
-        plt.savefig(os.path.join(tipologia_dir, f'istogramma_{tipologia_professionista}anno{anno}.png'))
 
+        # Salva l'istogramma
+        plt.savefig(output_path)
         plt.close()
+
+
 
 def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
     """
