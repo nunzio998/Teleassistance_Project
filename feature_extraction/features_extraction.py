@@ -77,13 +77,25 @@ def extract_year_and_month(df):
     df['year'] = df['data_erogazione'].dt.year
     df['month'] = df['data_erogazione'].dt.month
 
+    # Caricamento automatico dei file Parquet per ogni anno e mese
+    directory = 'month_dataset'
+
+    # Crea la directory se non esiste
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Directory '{directory}' creata.")
+
     # Raggruppa il DataFrame per anno e mese e salva ogni gruppo in un file Parquet separato
     for (year, month), group in df.groupby(['year', 'month']):
         output_path = f'month_dataset/Anno_{year}_Mese_{month}.parquet'
-        group.to_parquet(output_path, index=False)
 
-    # Caricamento automatico dei file Parquet per ogni anno e mese
-    directory = 'month_dataset'
+        # Se il file esiste, salta la creazione
+        if not os.path.isfile(output_path):
+            group.to_parquet(output_path, index=False)
+            print(f"File '{output_path}' creato.")
+        else:
+            print(f"File '{output_path}' esiste già. Salto la creazione.")
+
     for file_name in os.listdir(directory):
         if file_name.endswith('.parquet'):
             file_path = os.path.join(directory, file_name)
