@@ -130,6 +130,7 @@ def conta_professionisti_per_mese(cartella):
 
             # Aggiungi al DataFrame aggregato
             dati_aggregati.append(conteggio_occorrenze)
+
     # Concatena tutti i risultati in un unico DataFrame
     df_aggregato = pd.concat(dati_aggregati, ignore_index=True)
     pd.set_option('display.max_rows', None)
@@ -193,6 +194,45 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
 
         plt.close()
 
+def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
+    """
+    Crea e salva grafici a barre e istogrammi per ogni tipologia di professionista sanitario.
+
+    Args:
+    df_aggregato (pd.DataFrame): Il DataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
+    output_dir (str): La directory principale dove salvare i grafici.
+    """
+    # Creare la cartella principale se non esiste
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Ottenere tutte le tipologie di professionisti sanitari
+    tipologie = df_aggregato['tipologia_professionista_sanitario'].unique()
+
+    for tipologia in tipologie:
+        # Sostituire i caratteri non validi nei nomi delle cartelle
+        tipologia_professionista = tipologia.replace('/', '_')
+
+        # Creare una sottocartella per ogni tipologia
+        tipologia_dir = os.path.join(output_dir, tipologia_professionista)
+        if not os.path.exists(tipologia_dir):
+            os.makedirs(tipologia_dir)
+
+        # Filtrare il DataFrame per la tipologia specificata
+        df_professionista = df_aggregato[df_aggregato['tipologia_professionista_sanitario'] == tipologia]
+
+        # Assicurarsi che i mesi siano ordinati da 1 a 12
+        df_professionista = df_professionista.sort_values(by=['mese', 'anno'])
+
+        # Creare e salvare il grafico a barre
+        crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
+
+        # Creare e salvare gli istogrammi per ogni anno
+        crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
+
+
+
+
 def feature_extraction(df):
     """
     Aggiunge nuove features al DataFrame: età del paziente e durata della televisita.
@@ -206,6 +246,7 @@ def feature_extraction(df):
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
     df_aggregato = conta_professionisti_per_mese('month_dataset')
+    crea_grafici_e_salva(df_aggregato)
     # Salva il DataFrame aggregato in un file Parquet per ulteriori analisi
     df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)
     return df
