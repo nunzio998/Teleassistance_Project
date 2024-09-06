@@ -145,9 +145,22 @@ def salva_incremento_percentuale_per_intervalli(df, tipologie, intervalli_anni_m
 
     # Salva il DataFrame espanso in un file Parquet
     df_incremento_percentuale_espanso.to_parquet(output_file, index=False)
+def extract_colum_increment(df,k):
+    # Rinomina le colonne per facilitare l'unione
+    k.rename(columns={'tipologia': 'tipologia_professionista_sanitario', 'month': 'mesi'}, inplace=True)
 
+    # Unisci i DataFrame sulle colonne 'tipologia_professionista_sanitario', 'year', e 'mesi'
+    df_merged = pd.merge(df, k[['tipologia_professionista_sanitario', 'year', 'mesi', 'incremento']],
+                         left_on=['tipologia_professionista_sanitario', 'year', 'month'],
+                         right_on=['tipologia_professionista_sanitario', 'year', 'mesi'],
+                         how='left')
 
-def incremento():
+    # Rimuovi la colonna 'mesi' che è stata aggiunta durante l'unione
+    df_merged.drop(columns=['mesi'], inplace=True)
+
+    return df_merged
+
+def incremento(df):
     # Carica il file df_aggregato.parquet
     file_path = 'datasets/df_aggregato.parquet'
     df_aggregato = pd.read_parquet(file_path)
@@ -171,9 +184,9 @@ def incremento():
     # Salva l'incremento percentuale per i vari intervalli di mesi e anni per ogni tipologia di professionista sanitario in un file Parquet
     output_file = 'datasets/incremento_percentuale.parquet'
     salva_incremento_percentuale_per_intervalli(df_aggregato, tipologie, intervalli_anni_mesi, output_file)
-    file_incremento = pd.read_parquet(output_file)
-    print(file_incremento.head(30))
-    return output_file
+    L = pd.read_parquet('datasets/incremento_percentuale.parquet')
+    df = extract_colum_increment(df, L)
+    return df
 
 """
     tipologia  mesi       anno  percentuale

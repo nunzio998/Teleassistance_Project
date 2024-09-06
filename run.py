@@ -18,13 +18,14 @@ df = data_cleaning(df)
 df = feature_selection_execution(df)
 # Feature extraction
 df = feature_extraction(df)
-pd.set_option('display.width', 1000)
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-print(df.head(100000))
-#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
-incremento()
 
+#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
+df=incremento(df)
+
+#Visualizzazione di 20 righe del dataset casuali dopo aver aggiunto la colonna incremento
+df_sample = df.sample(n=100, random_state=1)
+# Visualizza le prime 500 righe del DataFrame
+print(df_sample.to_string())
 
 # Visualizzazione del numero di righe e colonne del dataset
 num_rows, num_columns = df.shape
