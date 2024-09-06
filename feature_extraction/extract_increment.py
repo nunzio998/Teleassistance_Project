@@ -1,5 +1,5 @@
 import pandas as pd
-
+import io
 
 def conta_televisite_per_mesi(df, anni, mesi, tipologia):
     """
@@ -96,11 +96,55 @@ def salva_incremento_percentuale_per_intervalli(df, tipologie, intervalli_anni_m
                 'percentuale': incremento,
                 'incremento': classificazione
             })
+
     # Creare un DataFrame con i risultati
     df_risultati = pd.DataFrame(risultati)
 
-    # Salvare il DataFrame in un file Parquet
-    df_risultati.to_parquet(output_file, index=False)
+    # Trasforma il DataFrame in un buffer Parquet senza salvarlo su disco
+    incremento_percentuale_compatto = io.BytesIO()
+    df_risultati.to_parquet(incremento_percentuale_compatto, index=False)
+
+    # Sposta il puntatore all'inizio del buffer
+    incremento_percentuale_compatto.seek(0)
+
+    # Leggi il buffer Parquet in un nuovo DataFrame
+    df_incremento = pd.read_parquet(incremento_percentuale_compatto)
+
+    # Espandi i valori di 'mesi' per coprire tutti i mesi nel range e prendi solo il secondo anno
+    expanded_rows = []
+    for _, row in df_incremento.iterrows():
+        mesi_range = row['mesi'].split(',')
+        for mese in range(int(mesi_range[0]), int(mesi_range[1]) + 1):
+            anno = int(row['anno'].split(',')[1])  # Prendi solo il secondo anno
+            expanded_row = row.copy()
+            expanded_row['month'] = mese
+            expanded_row['anno'] = anno
+            expanded_rows.append(expanded_row)
+
+    df_incremento_expanded = pd.DataFrame(expanded_rows)
+
+    # Rinomina la colonna 'anno' in 'year'
+    df_incremento_expanded.rename(columns={'anno': 'year'}, inplace=True)
+
+    # Mantieni solo le colonne necessarie
+    df_incremento_expanded = df_incremento_expanded[['tipologia', 'month', 'year', 'percentuale', 'incremento']]
+
+    # Trasforma il DataFrame in un buffer Parquet senza salvarlo su disco
+    incremento_percentuale_espanso = io.BytesIO()
+    df_incremento_expanded.to_parquet(incremento_percentuale_espanso, index=False)
+
+    # Sposta il puntatore all'inizio del buffer
+    incremento_percentuale_espanso.seek(0)
+
+    # Leggi il buffer Parquet in un nuovo DataFrame
+    df_incremento_percentuale_espanso = pd.read_parquet(incremento_percentuale_espanso)
+
+    # Elimina la colonna 'index' se esiste
+    if 'index' in df_incremento_percentuale_espanso.columns:
+        df_incremento_percentuale_espanso.drop(columns=['index'], inplace=True)
+
+    # Salva il DataFrame espanso in un file Parquet
+    df_incremento_percentuale_espanso.to_parquet(output_file, index=False)
 
 
 def incremento():
