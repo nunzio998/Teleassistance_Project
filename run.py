@@ -1,5 +1,4 @@
 import pandas as pd
-
 from data_prep.data_cleaning import data_cleaning
 from data_prep.features_selection import feature_selection_execution
 from feature_extraction.features_extraction import feature_extraction
@@ -8,16 +7,7 @@ from feature_extraction.extract_increment import incremento
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
-"""
-#Lavoro sulle prime 100 righe per facilità
-# Modifica temporanea del numero massimo di colonne visualizzate
-# Imposta la larghezza massima della visualizzazione a un valore elevato
-pd.set_option('display.width', 1000)
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-df = df.head(100)
-print(df)
-"""
+
 # Visualizzazione del numero di righe e colonne del dataset
 num_rows, num_columns = df.shape
 print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
@@ -28,11 +18,12 @@ df = data_cleaning(df)
 df = feature_selection_execution(df)
 # Feature extraction
 df = feature_extraction(df)
+pd.set_option('display.width', 1000)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+print(df.head(100000))
 #df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
-
-# Crea file parquet con incremento quadrimestrale per ogni professonista sanitario
 incremento()
-
 
 
 # Visualizzazione del numero di righe e colonne del dataset

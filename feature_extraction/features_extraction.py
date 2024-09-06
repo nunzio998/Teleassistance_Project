@@ -50,17 +50,26 @@ def extract_eta_paziente(df):
 
     return df
 
+def extract_year_and_month(df):
+    """
+    Estrae l'anno e il mese dalla colonna 'data_erogazione' e crea le nuove colonne 'year' e 'month' nel DataFrame.
 
-def extract_incremento(df):
+    Parametri:
+    df (DataFrame): Il DataFrame originale contenente la colonna 'data_erogazione'.
+
+    Ritorna:
+    DataFrame: Il DataFrame originale con le nuove colonne 'year' e 'month'.
     """
-    Aggiunge una nuova feature al DataFrame: incremento.
-    :param df:
-    :return:
-    """
-    # TODO: Implementare la funzione
+    # Assicurati che la colonna 'data_erogazione' sia nel formato datetime
+    df['data_erogazione'] = pd.to_datetime(df['data_erogazione'], errors='coerce')
+
+    # Crea nuove colonne 'year' e 'month' estraendo l'anno e il mese dalla colonna 'data_erogazione'
+    df['year'] = df['data_erogazione'].dt.year
+    df['month'] = df['data_erogazione'].dt.month
+
     return df
 
-def extract_year_and_month(df):
+def save_grouped_by_year_and_month(df, directory='month_dataset'):
     '''
     Questa funzione estrae l'anno e il mese dalla colonna 'data_erogazione' di un DataFrame,
     crea nuove colonne 'year' e 'month', e poi raggruppa il DataFrame per anno e mese.
@@ -73,13 +82,6 @@ def extract_year_and_month(df):
     Ritorna:
     DataFrame: Il DataFrame originale con le nuove colonne 'year' e 'month'.
     '''
-    # Crea nuove colonne 'year' e 'month' estraendo l'anno e il mese dalla colonna 'data_erogazione'
-    df['year'] = df['data_erogazione'].dt.year
-    df['month'] = df['data_erogazione'].dt.month
-
-    # Caricamento automatico dei file Parquet per ogni anno e mese
-    directory = 'month_dataset'
-
     # Crea la directory se non esiste
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -270,14 +272,15 @@ def feature_extraction(df):
     :param df: Il DataFrame originale.
     :return: Il DataFrame con le nuove features.
     """
+
     # Calcolare l'età del paziente
     df = extract_eta_paziente(df)
     # Calcolare la durata della televisita
     df = extract_durata_televisita(df)
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
+    save_grouped_by_year_and_month(df)
     df_aggregato = conta_professionisti_per_mese('month_dataset')
-
     #crea_grafici_e_salva(df_aggregato)
 
     # Salva il DataFrame aggregato in un file Parquet per ulteriori analisi

@@ -102,6 +102,7 @@ def salva_incremento_percentuale_per_intervalli(df, tipologie, intervalli_anni_m
     # Salvare il DataFrame in un file Parquet
     df_risultati.to_parquet(output_file, index=False)
 
+
 def incremento():
     # Carica il file df_aggregato.parquet
     file_path = 'datasets/df_aggregato.parquet'
@@ -128,6 +129,7 @@ def incremento():
     salva_incremento_percentuale_per_intervalli(df_aggregato, tipologie, intervalli_anni_mesi, output_file)
     file_incremento = pd.read_parquet(output_file)
     print(file_incremento.head(30))
+    return output_file
 
 """
     tipologia  mesi       anno  percentuale
