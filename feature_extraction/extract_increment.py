@@ -189,17 +189,117 @@ def incremento(df):
     return df
 
 """
-    tipologia  mesi       anno  percentuale
-0  Infermiere   1,4  2019,2020   115.818092
-1  Infermiere   5,8  2019,2020    38.422351
-2  Infermiere  9,12  2019,2020    79.069648
-3  Infermiere   1,4  2020,2021    51.094824
-4  Infermiere   5,8  2020,2021     7.337388
-5  Infermiere  9,12  2020,2021   -30.465416
-6  Infermiere   1,4  2021,2022   -31.421295
-7  Infermiere   5,8  2021,2022   -16.122280
-8  Infermiere  9,12  2021,2022    -8.365598
-9   Psicologo   1,4  2019,2020   140.305149
+                                             tipologia  mese       anno  percentuale incremento
+0                                           Infermiere   1,4  2019,2020   115.818092       alta
+1                                           Infermiere   5,8  2019,2020    38.422351   costante
+2                                           Infermiere  9,12  2019,2020    79.069648      media
+3                                           Infermiere   1,4  2020,2021    51.094824      media
+4                                           Infermiere   5,8  2020,2021     7.337388   costante
+5                                           Infermiere  9,12  2020,2021   -30.465416      bassa
+6                                           Infermiere   1,4  2021,2022   -31.421295      bassa
+7                                           Infermiere   5,8  2021,2022   -16.122280      bassa
+8                                           Infermiere  9,12  2021,2022    -8.365598      bassa
+9                                            Psicologo   1,4  2019,2020   140.305149       alta
+10                                           Psicologo   5,8  2019,2020    43.310386   costante
+11                                           Psicologo  9,12  2019,2020    71.346627      media
+12                                           Psicologo   1,4  2020,2021    48.862434   costante
+13                                           Psicologo   5,8  2020,2021    11.027569   costante
+14                                           Psicologo  9,12  2020,2021   -19.033955      bassa
+15                                           Psicologo   1,4  2021,2022   -20.437178      bassa
+16                                           Psicologo   5,8  2021,2022   -12.509406      bassa
+17                                           Psicologo  9,12  2021,2022   -13.723174      bassa
+18                                            Dietista   1,4  2019,2020   139.704939       alta
+19                                            Dietista   5,8  2019,2020    53.622207      media
+20                                            Dietista  9,12  2019,2020   101.484169       alta
+21                                            Dietista   1,4  2020,2021    59.379181      media
+22                                            Dietista   5,8  2020,2021     9.189070   costante
+23                                            Dietista  9,12  2020,2021   -30.463251      bassa
+24                                            Dietista   1,4  2021,2022   -28.912021      bassa
+25                                            Dietista   5,8  2021,2022   -11.019173      bassa
+26                                            Dietista  9,12  2021,2022    -5.202448      bassa
+27                                      Fisioterapista   1,4  2019,2020   149.233716       alta
+28                                      Fisioterapista   5,8  2019,2020    46.303901   costante
+29                                      Fisioterapista  9,12  2019,2020    87.737478      media
+30                                      Fisioterapista   1,4  2020,2021    61.337433      media
+31                                      Fisioterapista   5,8  2020,2021    24.491228   costante
+32                                      Fisioterapista  9,12  2020,2021   -19.641214      bassa
+33                                      Fisioterapista   1,4  2021,2022   -30.014293      bassa
+34                                      Fisioterapista   5,8  2021,2022   -24.464487      bassa
+35                                      Fisioterapista  9,12  2021,2022   -13.165426      bassa
+36                                Assistente sanitario   1,4  2019,2020   146.640316       alta
+37                                Assistente sanitario   5,8  2019,2020    28.490028   costante
+38                                Assistente sanitario  9,12  2019,2020    78.473581      media
+39                                Assistente sanitario   1,4  2020,2021    27.483974   costante
+40                                Assistente sanitario   5,8  2020,2021     3.325942   costante
+41                                Assistente sanitario  9,12  2020,2021   -26.589912      bassa
+42                                Assistente sanitario   1,4  2021,2022   -28.975487      bassa
+43                                Assistente sanitario   5,8  2021,2022   -29.113019      bassa
+44                                Assistente sanitario  9,12  2021,2022   -22.479462      bassa
+45                                         Logopedista   1,4  2019,2020    85.096154      media
+46                                         Logopedista   5,8  2019,2020    42.626070   costante
+47                                         Logopedista  9,12  2019,2020    98.802395      media
+48                                         Logopedista   1,4  2020,2021    74.545455      media
+49                                         Logopedista   5,8  2020,2021    28.552368   costante
+50                                         Logopedista  9,12  2020,2021   -16.967871      bassa
+51                                         Logopedista   1,4  2021,2022   -26.537698      bassa
+52                                         Logopedista   5,8  2021,2022   -16.502335      bassa
+53                                         Logopedista  9,12  2021,2022    -3.990326      bassa
+54                                         Ostetrica/o   1,4  2019,2020   182.264151       alta
+55                                         Ostetrica/o   5,8  2019,2020    57.824427      media
+56                                         Ostetrica/o  9,12  2019,2020    67.027864      media
+57                                         Ostetrica/o   1,4  2020,2021    41.042781   costante
+58                                         Ostetrica/o   5,8  2020,2021     3.627570   costante
+59                                         Ostetrica/o  9,12  2020,2021   -39.017609      bassa
+60                                         Ostetrica/o   1,4  2021,2022   -37.440758      bassa
+61                                         Ostetrica/o   5,8  2021,2022   -17.736289      bassa
+62                                         Ostetrica/o  9,12  2021,2022    -8.966565      bassa
+63                             Terapista Occupazionale   1,4  2019,2020   188.349515       alta
+64                             Terapista Occupazionale   5,8  2019,2020    41.743119   costante
+65                             Terapista Occupazionale  9,12  2019,2020    55.681818      media
+66                             Terapista Occupazionale   1,4  2020,2021    31.649832   costante
+67                             Terapista Occupazionale   5,8  2020,2021     9.385113   costante
+68                             Terapista Occupazionale  9,12  2020,2021   -30.900243      bassa
+69                             Terapista Occupazionale   1,4  2021,2022   -35.549872      bassa
+70                             Terapista Occupazionale   5,8  2021,2022   -23.668639      bassa
+71                             Terapista Occupazionale  9,12  2021,2022    -1.056338      bassa
+72                             Educatore Professionale   1,4  2019,2020    80.882353      media
+73                             Educatore Professionale   5,8  2019,2020    36.150235   costante
+74                             Educatore Professionale  9,12  2019,2020    43.253968   costante
+75                             Educatore Professionale   1,4  2020,2021    28.861789   costante
+76                             Educatore Professionale   5,8  2020,2021     8.620690   costante
+77                             Educatore Professionale  9,12  2020,2021   -31.855956      bassa
+78                             Educatore Professionale   1,4  2021,2022   -21.766562      bassa
+79                             Educatore Professionale   5,8  2021,2022   -28.253968      bassa
+80                             Educatore Professionale  9,12  2021,2022   -15.040650      bassa
+81                                            Podologo   1,4  2019,2020   109.219858       alta
+82                                            Podologo   5,8  2019,2020    12.156863   costante
+83                                            Podologo  9,12  2019,2020    61.316872      media
+84                                            Podologo   1,4  2020,2021    26.779661   costante
+85                                            Podologo   5,8  2020,2021     7.342657   costante
+86                                            Podologo  9,12  2020,2021   -26.020408      bassa
+87                                            Podologo   1,4  2021,2022   -36.363636      bassa
+88                                            Podologo   5,8  2021,2022   -18.241042      bassa
+89                                            Podologo  9,12  2021,2022   -28.275862      bassa
+90   Terapista della Neuro e Psicomotricità dell'Et...   1,4  2019,2020   110.169492       alta
+91   Terapista della Neuro e Psicomotricità dell'Et...   5,8  2019,2020     0.904977   costante
+92   Terapista della Neuro e Psicomotricità dell'Et...  9,12  2019,2020    64.285714      media
+93   Terapista della Neuro e Psicomotricità dell'Et...   1,4  2020,2021    32.258065   costante
+94   Terapista della Neuro e Psicomotricità dell'Et...   5,8  2020,2021    29.147982   costante
+95   Terapista della Neuro e Psicomotricità dell'Et...  9,12  2020,2021   -49.360614      bassa
+96   Terapista della Neuro e Psicomotricità dell'Et...   1,4  2021,2022   -39.024390      bassa
+97   Terapista della Neuro e Psicomotricità dell'Et...   5,8  2021,2022   -34.722222      bassa
+98   Terapista della Neuro e Psicomotricità dell'Et...  9,12  2021,2022   -10.101010      bassa
+99                 Tecnico Riabilitazione Psichiatrica   1,4  2019,2020   138.260870       alta
+100                Tecnico Riabilitazione Psichiatrica   5,8  2019,2020    14.220183   costante
+101                Tecnico Riabilitazione Psichiatrica  9,12  2019,2020    59.469697      media
+102                Tecnico Riabilitazione Psichiatrica   1,4  2020,2021    32.481752   costante
+103                Tecnico Riabilitazione Psichiatrica   5,8  2020,2021    27.309237   costante
+104                Tecnico Riabilitazione Psichiatrica  9,12  2020,2021   -33.254157      bassa
+105                Tecnico Riabilitazione Psichiatrica   1,4  2021,2022   -33.884298      bassa
+106                Tecnico Riabilitazione Psichiatrica   5,8  2021,2022   -19.873817      bassa
+107                Tecnico Riabilitazione Psichiatrica  9,12  2021,2022    -6.049822      bassa
+
 
 """
+
 
