@@ -3,11 +3,12 @@ from data_prep.data_cleaning import data_cleaning
 from data_prep.features_selection import feature_selection_execution
 from feature_extraction.features_extraction import feature_extraction
 from feature_extraction.extract_increment import incremento
+from clustering.clustering_execution import execute_clustering
 
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
-
+#df = df.head(10000)
 # Visualizzazione del numero di righe e colonne del dataset
 num_rows, num_columns = df.shape
 print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
@@ -21,6 +22,7 @@ df = feature_extraction(df)
 
 #df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
 df=incremento(df)
+execute_clustering(df)
 
 #Visualizzazione di 20 righe del dataset casuali dopo aver aggiunto la colonna incremento
 df_sample = df.sample(n=100, random_state=1)
