@@ -19,9 +19,9 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     #TODO da inserire in data cleaning/feature selection? N.B. alcune cose servono per il calcolo dell'incremento
 
     """
-    df.drop(columns=['id_prenotazione', 'data_nascita', 'asl_residenza',
+    df.drop(columns=['id_prenotazione', 'asl_residenza',
                      'comune_residenza', 'descrizione_attivita',  'data_contatto', 'data_erogazione',
-                     'asl_erogazione', 'ora_inizio_erogazione', 'ora_fine_erogazione', 'codice_struttura_erogazione'], inplace=True)
+                     'asl_erogazione', 'codice_struttura_erogazione'], inplace=True)
     return df
 
 def define_categorical_features():

@@ -30,6 +30,16 @@ def extract_durata_televisita(df):
 
     return df
 
+
+def remove_ora_erogazione(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rimuove le feature 'ora_inizio_erogazione' e 'ora_fine_erogazione' dal dataFrame.
+    :return: df senza le colonne specificate.
+    """
+    df.drop(columns=['ora_inizio_erogazione', 'ora_fine_erogazione'], inplace=True)
+    return df
+
+
 def extract_eta_paziente(df):
     # Assicurarsi che 'data_nascita' sia in formato datetime
     df['data_nascita'] = pd.to_datetime(df['data_nascita'], errors='coerce')
@@ -49,6 +59,16 @@ def extract_eta_paziente(df):
     df['eta_paziente'] = df.apply(calcola_eta, axis=1)
 
     return df
+
+def remove_data_nascita(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rimuove le feature 'ora_inizio_erogazione' e 'ora_fine_erogazione' dal dataFrame.
+    :return: df senza le colonne specificate.
+    """
+    df.drop(columns=['data_nascita'], inplace=True)
+    return df
+
+
 
 def extract_year_and_month(df):
     """
@@ -181,8 +201,6 @@ def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, t
         print(f"Grafico mensile salvato in '{output_path}'.")
 
 
-
-
 def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
     Crea e salva gli istogrammi annuali per una specifica tipologia di professionista sanitario.
@@ -264,8 +282,6 @@ def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
         crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
 
 
-
-
 def feature_extraction(df):
     """
     Aggiunge nuove features al DataFrame: età del paziente e durata della televisita.
@@ -273,12 +289,18 @@ def feature_extraction(df):
     :return: Il DataFrame con le nuove features.
     """
 
-    # Calcolare l'età del paziente
+    # Calcola l'età del paziente e rimuove la colonna 'data_nascita'
     df = extract_eta_paziente(df)
-    # Calcolare la durata della televisita
+    df = remove_data_nascita(df)
+
+    # Calcola la durata della televisita e rimuove le colonne dell'ora di inizio e fine erogazione
     df = extract_durata_televisita(df)
+    df = remove_ora_erogazione(df)
+
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)
+
+
     save_grouped_by_year_and_month(df)
     df_aggregato = conta_professionisti_per_mese('month_dataset')
     #crea_grafici_e_salva(df_aggregato)
