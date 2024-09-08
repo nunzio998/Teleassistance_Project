@@ -60,6 +60,20 @@ def elbow_method():
     #TODO
     return None
 
+def transform_features(df, preprocessor):
+    """
+    Trasforma le feature del DataFrame e ottiene i nomi delle nuove feature.
+    :param df: DataFrame originale
+    :param preprocessor: ColumnTransformer
+    :return: DataFrame trasformato, array di feature codificate, nomi delle feature
+    """
+    # Trasformazione delle feature
+    encoded_features = preprocessor.fit_transform(df.drop(['incremento'], axis=1))
+
+    # Ottieni i nomi delle feature trasformate
+    feature_names = preprocessor.get_feature_names_out()
+
+    return df, encoded_features, feature_names
 
 def execute_clustering(df):
     """
@@ -76,6 +90,8 @@ def execute_clustering(df):
     numerical_features = define_numerical_features()
 
     preprocessor = create_preprocessor(categorical_features, numerical_features)
+
+    df, encoded_features, feature_names = transform_features(df, preprocessor)
 
     return df
 
