@@ -15,6 +15,24 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
                      'asl_erogazione', 'ora_inizio_erogazione', 'ora_fine_erogazione', 'codice_struttura_erogazione'], inplace=True)
     return df
 
+def define_categorical_features():
+    """
+    Definisce le colonne delle feature categoriche.
+    :return: List of categorical features
+    """
+    return [
+        'id_paziente', 'provincia_residenza', 'regione_residenza', 'provincia_erogazione',
+        'regione_erogazione', 'tipologia_struttura_erogazione', 'tipologia_professionista_sanitario',
+        'id_professionista_sanitario', 'sesso'
+    ]
+
+def define_numerical_features():
+    """
+    Definisce le colonne delle feature numeriche.
+    :return: List of numerical features
+    """
+    return ['eta_paziente', 'durata_televisita']
+
 
 
 def execute_clustering(df):
