@@ -1,4 +1,8 @@
+import os
+
 import pandas as pd
+import numpy
+from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
@@ -55,13 +59,37 @@ def create_preprocessor(categorical_features, numerical_features):
             ('cat', OneHotEncoder(sparse_output=True), categorical_features)
         ])
 
-def elbow_method():
+
+def plot_elbow_method(encoded_features, max_clusters=10):
     """
-    Utilizziamo l'Elbow Method per trovare il numero ottimale di Clusters.
-    :return:
+    Calcola e visualizza il metodo del gomito per determinare il numero ottimale di cluster.
+    :param encoded_features: Array di feature codificate
+    :param max_clusters: Numero massimo di cluster da testare
     """
-    #TODO
-    return None
+    inertia = []  # Lista per memorizzare l'inertia (somma delle distanze al quadrato dai centroidi)
+
+    for n_clusters in range(1, max_clusters + 1):
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        kmeans.fit(encoded_features)
+        inertia.append(kmeans.inertia_)  # Aggiungi l'inertia per il numero corrente di cluster
+
+    # Crea la cartella per salvare i grafici solo se non esiste
+    if not os.path.exists('graphs'):
+        os.makedirs('graphs')
+
+    # Plot dell'Elbow Method
+    plt.figure(figsize=(8, 6))
+    plt.plot(range(1, max_clusters + 1), inertia, marker='o')
+    plt.xlabel('Numero di Cluster')
+    plt.ylabel('Inertia')
+    plt.title('Metodo del Gomito')
+    plt.grid(True)
+    # Salva il grafico nella cartella 'graphs'
+    plt.savefig('graphs/elbow_method.png')
+    plt.close()
+
+    # Ritorna i valori dell'inertia per ulteriori analisi
+    return inertia
 
 def transform_features(df, preprocessor):
     """
@@ -78,6 +106,7 @@ def transform_features(df, preprocessor):
     feature_names = preprocessor.get_feature_names_out()
 
     return df, encoded_features, feature_names
+
 
 def apply_clustering(encoded_features):
     """
@@ -107,6 +136,7 @@ def apply_clustering(encoded_features):
     return labels, svd_data, encoded_features
 
 
+
 def execute_clustering(df):
     """
     Metodo che esegue tutti i metodi del file clustering_execution
@@ -125,7 +155,9 @@ def execute_clustering(df):
 
     df, encoded_features, feature_names = transform_features(df, preprocessor)
 
-    labels, pca_data, encoded_features = apply_clustering(encoded_features)
+    labels, svd_data, encoded_features = apply_clustering(encoded_features)
+
+    plot_elbow_method(encoded_features)
 
     return df
 
