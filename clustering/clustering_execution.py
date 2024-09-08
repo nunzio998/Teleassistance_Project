@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 import numpy
 from matplotlib import pyplot as plt
@@ -8,6 +7,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
+from clustering.clustering_metrics import plot_increment_distribution
 
 
 def remove_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -156,8 +156,12 @@ def execute_clustering(df):
     df, encoded_features, feature_names = transform_features(df, preprocessor)
 
     labels, svd_data, encoded_features = apply_clustering(encoded_features)
+    # Aggiungiamo le etichette e le componenti principali al dataframe originale
+    df['Cluster'] = labels
 
     plot_elbow_method(encoded_features)
+
+    plot_increment_distribution(df)
 
     return df
 

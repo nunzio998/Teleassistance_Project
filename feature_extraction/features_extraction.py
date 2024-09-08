@@ -121,7 +121,6 @@ def save_grouped_by_year_and_month(df, directory='month_dataset'):
             df = pd.read_parquet(file_path)
     return df
 
-
 def conta_professionisti_per_mese(cartella):
     """
     Conta per ogni mese (file Parquet) il numero di volte in cui compare ogni professionista sanitario.
