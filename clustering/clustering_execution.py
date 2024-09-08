@@ -7,7 +7,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
-from clustering.clustering_metrics import plot_increment_distribution
+from clustering.clustering_metrics import plot_increment_distribution, compute_all_metrics
 
 
 def remove_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -16,7 +16,7 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     :param df:
     :return: df senza le colonne specificate.
 
-    #TODO da inserire in data cleaning/feature selection? N.B. alcune cose servono per il calcolo dell'incremento
+    #TODO da inserire in data cleaning/feature selection?
 
     """
     df.drop(columns=['id_prenotazione', 'asl_residenza',
@@ -144,7 +144,7 @@ def execute_clustering(df):
     :return: df
 
     """
-
+    print("Eseguo il clustering...")
     df = remove_features(df)
 
     categorical_features = define_categorical_features()
@@ -159,9 +159,12 @@ def execute_clustering(df):
     # Aggiungiamo le etichette e le componenti principali al dataframe originale
     df['Cluster'] = labels
 
+    print("Sto eseguendo l'Elbow Method...")
+    print("Attendi, mi ci vorrà del tempo...")
     plot_elbow_method(encoded_features)
 
-    plot_increment_distribution(df)
+    print("Sto calcolando le metriche...")
+    compute_all_metrics(df)
 
     return df
 

@@ -163,9 +163,12 @@ def extract_colum_increment(df,k):
     return df_merged
 
 def incremento(df):
+
     # Carica il file df_aggregato.parquet
     file_path = 'datasets/df_aggregato.parquet'
     df_aggregato = pd.read_parquet(file_path)
+
+    print("Calcolo la variabile incremento...")
 
     # Ottieni tutte le tipologie di professionisti sanitari presenti nel dataset
     tipologie = df_aggregato['tipologia_professionista_sanitario'].unique()
