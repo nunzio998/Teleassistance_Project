@@ -1,86 +1,38 @@
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.cluster import KMeans
-import seaborn as sns
-import matplotlib.pyplot as plt
+import pandas as pd
 
-def encoding_features(df):
 
+def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Metodo che effettua l'encoding delle feature categoriche
-    :param df: dataframe
-    :return: df, encoded_features, features_name
-
-    """
-
-    # Definisco le colonne delle feature categoriche
-    categorical_features = ['asl_residenza', 'provincia_residenza', 'comune_residenza',
-        'asl_erogazione', 'provincia_erogazione', 'struttura_erogazione', 'tipologia_struttura_erogazione',
-        'tipologia_professionista_sanitario', 'sesso'
-    ]
-
-    df = df[df['year'] != 2019].copy()  # Creo una copia del DataFrame, eliminando i dati del 2019, poichè l'incremento è NaN
-
-    df.reset_index(drop=True, inplace=True)  # Resetta l'indice
-
-    # Preprocessing delle feature
-    preprocessor = ColumnTransformer(transformers=[('cat', OneHotEncoder(), categorical_features)])
-
-    # Trasformazione delle feature
-    encoded_features = preprocessor.fit_transform(df.drop(['incremento', 'id_prenotazione', 'id_paziente'], axis=1))
-
-    # Ottieni i nomi delle feature trasformate
-    feature_names = preprocessor.get_feature_names_out()
-
-    return df, encoded_features, feature_names
-
-
-def kmeans_clustering(df, X):
-    """
-    Metodo che effettua il clustering attraverso l'algoritmo k-means
+    Rimuove le feature poco significative dal DataFrame.
     :param df:
-    :param X:
-    :return:
+    :return: df senza le colonne specificate.
+
+    #TODO da inserire in data cleaning/feature selection? N.B. alcune cose servono per il calcolo dell'incremento
+
     """
-    # Numero di cluster basato sulle categorie di incremento
-    n_clusters = len(df['incremento'].dropna().unique())  # Considero solo valori non NaN
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    df.drop(columns=['id_prenotazione', 'data_nascita', 'asl_residenza',
+                     'comune_residenza', 'descrizione_attivita',  'data_contatto', 'data_erogazione',
+                     'asl_erogazione', 'ora_inizio_erogazione', 'ora_fine_erogazione', 'codice_struttura_erogazione'], inplace=True)
+    return df
 
-    # Fit e predizione dei cluster
-    cluster_labels = kmeans.fit_predict(X)
-
-    # Controllo che il numero di righe corrisponda
-    if len(cluster_labels) != len(df):
-        raise ValueError(
-            f"Lunghezza delle etichette di cluster ({len(cluster_labels)}) non corrisponde alla lunghezza di df ({len(df)})")
-
-    df.loc[:, 'cluster'] = cluster_labels  # Uso .loc per modificare il DataFrame
-
-
-def cluster_plot(df):
-    """
-    Metodo che plotta la distribuzione dei cluster rispetto all'incremento
-    :param df:
-    :return:
-    """
-    plt.figure(figsize=(12, 8))
-    sns.countplot(x='incremento', hue='cluster', data=df)
-    plt.title('Distribuzione dei Cluster rispetto a Incremento')
-    plt.show()
 
 
 def execute_clustering(df):
     """
     Metodo che esegue tutti i metodi del file clustering_execution
     :param df:
-    :return:
+    :return: df
 
     """
-    df, encoded_features, features_name = encoding_features(df)
 
-    kmeans_clustering(df, encoded_features)
+    df = remove_features(df)
 
-    cluster_plot(df)
+    return df
+
+
+
+
+
 
 
 

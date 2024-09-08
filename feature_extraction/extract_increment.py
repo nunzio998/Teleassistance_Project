@@ -145,6 +145,8 @@ def salva_incremento_percentuale_per_intervalli(df, tipologie, intervalli_anni_m
 
     # Salva il DataFrame espanso in un file Parquet
     df_incremento_percentuale_espanso.to_parquet(output_file, index=False)
+
+
 def extract_colum_increment(df,k):
     # Rinomina le colonne per facilitare l'unione
     k.rename(columns={'tipologia': 'tipologia_professionista_sanitario', 'month': 'mesi'}, inplace=True)
@@ -186,7 +188,33 @@ def incremento(df):
     salva_incremento_percentuale_per_intervalli(df_aggregato, tipologie, intervalli_anni_mesi, output_file)
     L = pd.read_parquet('datasets/incremento_percentuale.parquet')
     df = extract_colum_increment(df, L)
+
     return df
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
                                              tipologia  mese       anno  percentuale incremento

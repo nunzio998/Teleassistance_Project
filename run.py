@@ -5,13 +5,21 @@ from feature_extraction.features_extraction import feature_extraction
 from feature_extraction.extract_increment import incremento
 from clustering.clustering_execution import execute_clustering
 
+# Configura pandas per visualizzare un DataFrame senza limiti di spazio
+pd.set_option('display.max_rows', None)  # Nessun limite sul numero di righe
+pd.set_option('display.max_columns', None)  # Nessun limite sul numero di colonne
+pd.set_option('display.max_colwidth', None)  # Nessun limite sulla larghezza delle colonne
+pd.set_option('display.expand_frame_repr', False)  # Non espande il DataFrame su più righe
+
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
+
 #df = df.head(10000)
+
 # Visualizzazione del numero di righe e colonne del dataset
 num_rows, num_columns = df.shape
-print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
+print(f" Inizialmente il DataFrame ha {num_rows} righe e {num_columns} colonne.")
 
 # Data Cleaning
 df = data_cleaning(df)
@@ -20,18 +28,20 @@ df = feature_selection_execution(df)
 # Feature extraction
 df = feature_extraction(df)
 
-#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
-df=incremento(df)
-execute_clustering(df)
+# Visualizzazione del numero di righe e colonne del dataset
+num_rows, num_columns = df.shape
+print(f" Dopo la pulizia dei dati, il DataFrame ha {num_rows} righe e {num_columns} colonne.")
 
-#Visualizzazione di 20 righe del dataset casuali dopo aver aggiunto la colonna incremento
-df_sample = df.sample(n=100, random_state=1)
-# Visualizza le prime 500 righe del DataFrame
-print(df_sample.to_string())
+
+#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
+df = incremento(df)
+execute_clustering(df)
 
 # Visualizzazione del numero di righe e colonne del dataset
 num_rows, num_columns = df.shape
-print(f"Il DataFrame ha {num_rows} righe e {num_columns} colonne.")
+print(f" Dopo il clustering, il DataFrame ha {num_rows} righe e {num_columns} colonne.")
+
+
 
 
 '''
