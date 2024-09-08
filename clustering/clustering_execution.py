@@ -1,4 +1,6 @@
 import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
 
 
 def remove_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -34,6 +36,30 @@ def define_numerical_features():
     return ['eta_paziente', 'durata_televisita']
 
 
+def create_preprocessor(categorical_features, numerical_features):
+    """
+    Crea il ColumnTransformer per il preprocessing delle feature.
+    Le feature numeriche rimangono invariate, in quanto sono già state normalizzate e standardizzate.
+    Le feature numeriche vengono codificate con codifica OneHot.
+
+    :param categorical_features: List of categorical features
+    :param numerical_features: List of numerical features
+    :return: ColumnTransformer
+    """
+    return ColumnTransformer(
+        transformers=[
+            ('num', 'passthrough', numerical_features),  # Mantiene le feature numeriche senza trasformarle
+            ('cat', OneHotEncoder(sparse_output=True), categorical_features)
+        ])
+
+def elbow_method():
+    """
+    Utilizziamo l'Elbow Method per trovare il numero ottimale di Clusters.
+    :return:
+    """
+    #TODO
+    return None
+
 
 def execute_clustering(df):
     """
@@ -44,6 +70,12 @@ def execute_clustering(df):
     """
 
     df = remove_features(df)
+
+    categorical_features = define_categorical_features()
+
+    numerical_features = define_numerical_features()
+
+    preprocessor = create_preprocessor(categorical_features, numerical_features)
 
     return df
 
