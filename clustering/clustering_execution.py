@@ -1,5 +1,8 @@
 import pandas as pd
+from sklearn.cluster import KMeans
 from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import TruncatedSVD
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
 
@@ -63,6 +66,7 @@ def elbow_method():
 def transform_features(df, preprocessor):
     """
     Trasforma le feature del DataFrame e ottiene i nomi delle nuove feature.
+
     :param df: DataFrame originale
     :param preprocessor: ColumnTransformer
     :return: DataFrame trasformato, array di feature codificate, nomi delle feature
@@ -74,6 +78,34 @@ def transform_features(df, preprocessor):
     feature_names = preprocessor.get_feature_names_out()
 
     return df, encoded_features, feature_names
+
+def apply_clustering(encoded_features):
+    """
+    Applica il clustering sui dati trasformati utilizzando l'algoritmo K-Means.
+    Riduciamo la dimensionalità del dataset a 15 componenti principali utilizzando TruncatedSVD ( è simile
+    alla PCA, ma riesce a lavorare con matrici sparse (utile dopo la codifica OneHot)).
+
+    :param encoded_features: Array di feature codificate
+    :return: labels degli cluster, dati trasformati con TruncatedSVD
+
+    """
+    # Pipeline per il clustering con TruncatedSVD al posto di PCA
+    pipeline = Pipeline(steps=[
+        ('svd', TruncatedSVD(n_components=15)),  # Riduzione a 15 componenti principali (tanti quante sono le features)
+        ('cluster', KMeans(n_clusters=4, random_state=42))  # Clustering con KMeans
+    ])
+
+    # Applicazione del clustering e della riduzione dimensionale
+    pipeline.fit(encoded_features)
+
+    # Otteniamo le etichette dei cluster
+    labels = pipeline.named_steps['cluster'].labels_
+
+    # Trasformiamo i dati con TruncatedSVD
+    svd_data = pipeline.named_steps['svd'].transform(encoded_features)
+
+    return labels, svd_data, encoded_features
+
 
 def execute_clustering(df):
     """
@@ -92,6 +124,8 @@ def execute_clustering(df):
     preprocessor = create_preprocessor(categorical_features, numerical_features)
 
     df, encoded_features, feature_names = transform_features(df, preprocessor)
+
+    labels, pca_data, encoded_features = apply_clustering(encoded_features)
 
     return df
 

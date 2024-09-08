@@ -32,9 +32,12 @@ df = feature_extraction(df)
 num_rows, num_columns = df.shape
 print(f" Dopo la pulizia dei dati, il DataFrame ha {num_rows} righe e {num_columns} colonne.")
 
-
 #df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
+
+# Calcolo la variabile incremento
 df = incremento(df)
+
+# Eseguo il clustering
 execute_clustering(df)
 
 # Visualizzazione del numero di righe e colonne del dataset
