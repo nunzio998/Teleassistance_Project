@@ -291,10 +291,12 @@ def feature_extraction(df):
     # Calcola l'età del paziente e rimuove la colonna 'data_nascita'
     df = extract_eta_paziente(df)
     df = remove_data_nascita(df)
+    print("Eliminazione della feature: data_nascita")
 
     # Calcola la durata della televisita e rimuove le colonne dell'ora di inizio e fine erogazione
     df = extract_durata_televisita(df)
     df = remove_ora_erogazione(df)
+    print("Eliminazione della feature: ora_inizio_erogazione, ora_fine_erogazione")
 
     # Divisione dataset per anno e mese, e salvataggio in file Parquet
     df = extract_year_and_month(df)

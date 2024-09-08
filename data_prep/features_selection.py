@@ -67,6 +67,16 @@ def remove_regione_erogazione(df: pd.DataFrame) -> pd.DataFrame:
     df.drop(columns=['regione_erogazione'], inplace=True)
     return df
 
+def remove_id_prenotazione(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rimuove la feature id_prenotazione
+    :param df:
+    :return: df senza la colonna specificate.
+
+    """
+    print("Eliminazione della feature: id_prenotazione")
+    df.drop(columns=['id_prenotazione'], inplace=True)
+    return df
 
 def remove_tipologia_servizio(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -107,6 +117,7 @@ def feature_selection_execution(df) -> pd.DataFrame:
     """
     df = remove_columns_with_unique_correlation(df)
     df = remove_data_disdetta(df)
+    df = remove_id_prenotazione(df)
 
     # Se le due features hanno sempre valori uguali, rimuovo 'regione_erogazione'
     if check_regione_residenza_equals_regione_erogazione(df):

@@ -19,7 +19,7 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     #TODO da inserire in data cleaning/feature selection?
 
     """
-    df.drop(columns=['id_prenotazione', 'asl_residenza',
+    df.drop(columns=['asl_residenza',
                      'comune_residenza', 'descrizione_attivita',  'data_contatto', 'data_erogazione',
                      'asl_erogazione', 'codice_struttura_erogazione'], inplace=True)
     return df
