@@ -142,7 +142,6 @@ def incremento(df):
 
     # Unisci la colonna incremento al DataFrame originale
     df_finale = unisci_incremento(df, risultato_esteso)
-    tipologie, DaF, intervalli_anni_mese = dati_da_utilizzare(df)
 
     return df_finale
 
