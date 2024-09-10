@@ -56,11 +56,34 @@ def compute_purity(df, target_column):
     # Calcola la purezza media ponderata
     cluster_sizes = df['Cluster'].value_counts()
     total_purity = sum(cluster_purity[cluster] * cluster_sizes[cluster] for cluster in cluster_purity)
-    overall_purity = total_purity / len(df)
+    purity_score = total_purity / len(df)
 
-    print(f"\nPurezza complessiva del clustering: {overall_purity:.2f}")
+    print(f"\nPurezza complessiva del clustering: {purity_score:.2f}")
 
-    return cluster_purity, overall_purity
+    return cluster_purity, purity_score
+
+
+def compute_final_metric(purity_score: float, silhouette_score: float, num_clusters: int) -> float:
+    """
+    Calcola la metrica finale, come la media delle due metriche normalizzate
+    e sottraendo un termine di penalità pari a 0,05 volte il numero di cluster.
+
+    :param purity_score: La purezza normalizzata.
+    :param silhouette_score: Il punteggio di silhouette normalizzato.
+    :param num_clusters: Numero di cluster utilizzati nel clustering.
+    :return: La metrica finale calcolata.
+    """
+
+    # Calcola la media delle due metriche normalizzate
+    mean_normalized_metric = (purity_score + silhouette_score) / 2
+
+    # Calcola il termine di penalità
+    penalty = 0.05 * num_clusters
+
+    # Calcola la metrica finale sottraendo la penalità
+    final_metric = mean_normalized_metric - penalty
+
+    return final_metric
 
 
 def plot_increment_distribution(df):
@@ -98,11 +121,15 @@ def compute_all_metrics(df, encoded_features, labels):
 
     # calcolo la purezza di ogni cluster e la purezza media del clustering
     print("\nCalcolo della purezza di ciascun cluster e della purezza complessiva:")
-    cluster_purity, overall_purity = compute_purity(df, 'incremento')
+    cluster_purity, purity_score = compute_purity(df, 'incremento')
 
     print("\nCalcolo dell'indice di Silhouette... Attendi...")
-    score = compute_silhouette_score(encoded_features,labels)
+    silhouette_score = compute_silhouette_score(encoded_features,labels)
 
-    return cluster_purity, overall_purity
+    print("\nCalcolo la metrica finale...")
+    final_metric = compute_final_metric(purity_score, silhouette_score, num_clusters=4)
+    print("\nLa metrica finale è : ", final_metric)
+
+    return final_metric
 
 
