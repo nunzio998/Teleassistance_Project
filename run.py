@@ -76,3 +76,12 @@ data_disdetta                  460639
 dtype: int64
 -----------------------------------
 """
+
+#TODO: Rimuovere feature
+#TODO: Metriche di clustering
+#TODO: Collogare Elbow method ad apply clustering
+#TODO: Visualizzare i cluster
+#TODO: Visualizzare le metriche di clustering
+#TODO: Grafici generali
+
+
