@@ -161,10 +161,10 @@ def execute_clustering(df):
 
     print("Sto eseguendo l'Elbow Method...")
     print("Attendi, mi ci vorrà del tempo... Prenditi un caffè")
-    plot_elbow_method(encoded_features)
+    #plot_elbow_method(encoded_features)
 
     print("Sto calcolando le metriche...")
-    compute_all_metrics(df)
+    compute_all_metrics(df, encoded_features, labels)
 
     return df
 

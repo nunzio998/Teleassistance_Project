@@ -1,15 +1,25 @@
 import os
-
 from matplotlib import pyplot as plt
 import seaborn as sns
+from sklearn.metrics import silhouette_score
 
 
-def compute_silhoutte_index():
-    return None
+def compute_silhouette_score(encoded_features, labels):
+    """
+    Calcola e restituisce il Silhouette Score per il clustering effettuato.
+
+    :param encoded_features: Array di feature codificate (input del clustering)
+    :param labels: Etichette dei cluster generate dal modello K-Means
+    :return: Valore del Silhouette Score
+    """
+    score = silhouette_score(encoded_features, labels)
+    print(f"Silhouette Score: {score}")
+    return score
 
 def compute_purity(df, target_column):
     """
     Calcola la purezza del clustering per ciascun cluster e la purezza media ponderata.
+
     :param data: DataFrame contenente i dati con le colonne 'Cluster' e la colonna target.
     :param target_column: Colonna target rispetto alla quale calcolare la purezza.
     :return: Dizionario con le purezze per ciascun cluster e purezza complessiva.
@@ -68,7 +78,7 @@ def plot_increment_distribution(df):
     plt.close()
 
 
-def compute_all_metrics(df):
+def compute_all_metrics(df, encoded_features, labels):
 
     # Plotto la distribuzione dell'incremento rispetto ad ogni cluster
     plot_increment_distribution(df)
@@ -76,5 +86,8 @@ def compute_all_metrics(df):
     # calcolo la purezza di ogni cluster e la purezza media del clustering
     print("\nCalcolo della purezza di ciascun cluster e della purezza complessiva:")
     cluster_purity, overall_purity = compute_purity(df, 'incremento')
+    score = compute_silhouette_score(encoded_features,labels)
+
+    return cluster_purity, overall_purity, score
 
 
