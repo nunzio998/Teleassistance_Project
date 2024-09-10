@@ -1,7 +1,7 @@
 import os
 from matplotlib import pyplot as plt
 import seaborn as sns
-from sklearn.metrics import silhouette_score, silhouette_samples
+from sklearn.metrics import silhouette_samples
 import numpy as np
 
 
@@ -22,11 +22,11 @@ def compute_silhouette_score(encoded_features, labels):
                 silhouette_values.max() - silhouette_values.min())
 
     # Calcola il silhouette score medio normalizzato
-    normalized_silhouette_score = np.mean(normalized_silhouette_values)
+    final_score = np.mean(normalized_silhouette_values)
 
-    print(f"Silhouette Score normalizzato: {normalized_silhouette_score}")
+    print(f"L'indice di Silhouette medio normalizzato è : {final_score}")
 
-    return normalized_silhouette_score
+    return final_score
 
 
 def compute_purity(df, target_column):
@@ -100,7 +100,7 @@ def compute_all_metrics(df, encoded_features, labels):
     print("\nCalcolo della purezza di ciascun cluster e della purezza complessiva:")
     cluster_purity, overall_purity = compute_purity(df, 'incremento')
 
-    print("\nCalcolo dell'indice di Silhouette... Attendi...:")
+    print("\nCalcolo dell'indice di Silhouette... Attendi...")
     score = compute_silhouette_score(encoded_features,labels)
 
     return cluster_purity, overall_purity
