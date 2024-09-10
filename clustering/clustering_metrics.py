@@ -1,20 +1,33 @@
 import os
 from matplotlib import pyplot as plt
 import seaborn as sns
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, silhouette_samples
+import numpy as np
 
 
 def compute_silhouette_score(encoded_features, labels):
     """
-    Calcola e restituisce il Silhouette Score per il clustering effettuato.
+    Calcola e restituisce il Silhouette Score per il clustering effettuato,
+    normalizzato nel range [0, 1].
 
     :param encoded_features: Array di feature codificate (input del clustering)
     :param labels: Etichette dei cluster generate dal modello K-Means
-    :return: Valore del Silhouette Score
+    :return: Valore normalizzato del Silhouette Score
     """
-    score = silhouette_score(encoded_features, labels)
-    print(f"Silhouette Score: {score}")
-    return score
+    # Calcola i valori del silhouette per ciascun campione
+    silhouette_values = silhouette_samples(encoded_features, labels)
+
+    # Normalizza i valori del silhouette nel range [0, 1]
+    normalized_silhouette_values = (silhouette_values - silhouette_values.min()) / (
+                silhouette_values.max() - silhouette_values.min())
+
+    # Calcola il silhouette score medio normalizzato
+    normalized_silhouette_score = np.mean(normalized_silhouette_values)
+
+    print(f"Silhouette Score normalizzato: {normalized_silhouette_score}")
+
+    return normalized_silhouette_score
+
 
 def compute_purity(df, target_column):
     """
@@ -86,8 +99,10 @@ def compute_all_metrics(df, encoded_features, labels):
     # calcolo la purezza di ogni cluster e la purezza media del clustering
     print("\nCalcolo della purezza di ciascun cluster e della purezza complessiva:")
     cluster_purity, overall_purity = compute_purity(df, 'incremento')
+
+    print("\nCalcolo dell'indice di Silhouette... Attendi...:")
     score = compute_silhouette_score(encoded_features,labels)
 
-    return cluster_purity, overall_purity, score
+    return cluster_purity, overall_purity
 
 

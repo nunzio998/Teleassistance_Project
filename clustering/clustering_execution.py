@@ -100,7 +100,7 @@ def transform_features(df, preprocessor):
     :return: DataFrame trasformato, array di feature codificate, nomi delle feature
     """
     # Trasformazione delle feature
-    encoded_features = preprocessor.fit_transform(df.drop(['incremento'], axis=1))
+    encoded_features = preprocessor.fit_transform(df)
 
     # Ottieni i nomi delle feature trasformate
     feature_names = preprocessor.get_feature_names_out()

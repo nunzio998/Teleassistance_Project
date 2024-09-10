@@ -75,11 +75,11 @@ def classifica_incremento(percentuale):
     Returns:
     str: La classificazione dell'incremento ('alta', 'media', 'costante', 'bassa').
     """
-    if percentuale > 78:
+    if percentuale > 78.8:
         return 'alta'
-    elif 38 < percentuale <= 78:
+    elif 35 < percentuale <= 78.8:
         return 'media'
-    elif 10 <= percentuale <= 38:
+    elif 10 <= percentuale <= 35:
         return 'bassa'
     elif percentuale < 9:
         return 'costante'
