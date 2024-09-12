@@ -1,13 +1,11 @@
-import os
 import pandas as pd
-import numpy
+import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
-from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder
-from clustering.clustering_metrics import plot_increment_distribution, compute_all_metrics
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from clustering.clustering_metrics import compute_all_metrics
 
 
 def remove_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -19,63 +17,28 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     #TODO da inserire in data cleaning/feature selection?
 
     """
-    df.drop(columns=['asl_residenza',
-                     'comune_residenza', 'descrizione_attivita',  'data_contatto', 'data_erogazione',
-                     'asl_erogazione', 'codice_struttura_erogazione'], inplace=True)
-    return df
-
-def define_categorical_features():
-    """
-    Definisce le colonne delle feature categoriche.
-    :return: List of categorical features
-    """
-    return [
-        'id_paziente', 'provincia_residenza', 'regione_residenza', 'provincia_erogazione',
-        'regione_erogazione', 'tipologia_struttura_erogazione', 'tipologia_professionista_sanitario',
-        'id_professionista_sanitario', 'sesso'
+    features_to_drop = [
+        'id_prenotazione', 'id_paziente', 'asl_residenza', 'comune_residenza', 'descrizione_attivita',
+        'asl_erogazione', 'codice_struttura_erogazione', 'provincia_residenza', 'provincia_erogazione',
+        'struttura_erogazione', 'tipologia_struttura_erogazione', 'id_professionista_sanitario',
+        'tipologia_professionista_sanitario'
     ]
+    return df.drop(columns=[col for col in features_to_drop if col in df.columns])
 
-def define_numerical_features():
-    """
-    Definisce le colonne delle feature numeriche.
-    :return: List of numerical features
-    """
-    return ['eta_paziente', 'durata_televisita']
+def define_features_types() -> (list, list):
+    categorical_features = ['sesso', 'regione_residenza', 'provincia_residenza', 'regione_erogazione', 'incremento']
+    numerical_features = ['eta_paziente', 'durata_televisita', 'year', 'month']
+    return categorical_features, numerical_features
 
+def plot_elbow_method(data, max_clusters=10):
 
-def create_preprocessor(categorical_features, numerical_features):
-    """
-    Crea il ColumnTransformer per il preprocessing delle feature.
-    Le feature numeriche rimangono invariate, in quanto sono già state normalizzate e standardizzate.
-    Le feature numeriche vengono codificate con codifica OneHot.
-
-    :param categorical_features: List of categorical features
-    :param numerical_features: List of numerical features
-    :return: ColumnTransformer
-    """
-    return ColumnTransformer(
-        transformers=[
-            ('num', 'passthrough', numerical_features),  # Mantiene le feature numeriche senza trasformarle
-            ('cat', OneHotEncoder(sparse_output=True), categorical_features)
-        ])
-
-
-def plot_elbow_method(encoded_features, max_clusters=10):
-    """
-    Calcola e visualizza il metodo del gomito per determinare il numero ottimale di cluster.
-    :param encoded_features: Array di feature codificate
-    :param max_clusters: Numero massimo di cluster da testare
-    """
     inertia = []  # Lista per memorizzare l'inertia (somma delle distanze al quadrato dai centroidi)
 
     for n_clusters in range(1, max_clusters + 1):
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-        kmeans.fit(encoded_features)
+        kmeans.fit(data)
         inertia.append(kmeans.inertia_)  # Aggiungi l'inertia per il numero corrente di cluster
 
-    # Crea la cartella per salvare i grafici solo se non esiste
-    if not os.path.exists('graphs'):
-        os.makedirs('graphs')
 
     # Plot dell'Elbow Method
     plt.figure(figsize=(8, 6))
@@ -91,53 +54,46 @@ def plot_elbow_method(encoded_features, max_clusters=10):
     # Ritorna i valori dell'inertia per ulteriori analisi
     return inertia
 
-def transform_features(df, preprocessor):
-    """
-    Trasforma le feature del DataFrame e ottiene i nomi delle nuove feature.
+def transform_and_preprocess_data(df: pd.DataFrame, categorical_features: list, numerical_features: list):
+    label_encoders = {}
 
-    :param df: DataFrame originale
-    :param preprocessor: ColumnTransformer
-    :return: DataFrame trasformato, array di feature codificate, nomi delle feature
-    """
-    # Trasformazione delle feature
-    encoded_features = preprocessor.fit_transform(df)
+    # Gestione delle colonne temporali (convertire in timestamp con utc=True)
+    for col in ['data_contatto', 'data_erogazione']:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors='coerce', utc=True)
+            df[col] = df[col].astype(int) // 10 ** 9  # Convert to UNIX timestamp safely
 
-    # Ottieni i nomi delle feature trasformate
-    feature_names = preprocessor.get_feature_names_out()
+    # Applica LabelEncoder a ciascuna colonna categorica
+    for col in categorical_features:
+        if col in df.columns and (df[col].dtype == 'object' or isinstance(df[col].dtype, pd.StringDtype)):
+            le = LabelEncoder()
+            df[col] = le.fit_transform(df[col])
+            label_encoders[col] = le
 
-    return df, encoded_features, feature_names
+    # Verifica che tutte le colonne siano numeriche dopo l'encoding
+    if not all(np.issubdtype(df[col].dtype, np.number) for col in df.columns):
+        raise ValueError("Ci sono ancora colonne non numeriche nel DataFrame dopo l'encoding.")
+
+    return df, label_encoders  # Restituisco il dizionario label_encoders
 
 
-def apply_clustering(encoded_features):
-    """
-    Applica il clustering sui dati trasformati utilizzando l'algoritmo K-Means.
-    Riduciamo la dimensionalità del dataset a 15 componenti principali utilizzando TruncatedSVD ( è simile
-    alla PCA, ma riesce a lavorare con matrici sparse (utile dopo la codifica OneHot)).
+def apply_clustering(data, n_clusters=4, n_components=None):
 
-    :param encoded_features: Array di feature codificate
-    :return: labels degli cluster, dati trasformati con TruncatedSVD
+    if n_components is None:
+        n_components = min(10, data.shape[1])  # Imposta il numero massimo di componenti in base al numero di feature
 
-    """
     # Pipeline per il clustering con TruncatedSVD al posto di PCA
     pipeline = Pipeline(steps=[
-        ('svd', TruncatedSVD(n_components=15)),  # Riduzione a 15 componenti principali (tanti quante sono le features)
-        ('cluster', KMeans(n_clusters=4, random_state=42))  # Clustering con KMeans
+        ('dim_reduction', TruncatedSVD(n_components=n_components)),  # Riduzione a 15 componenti principali (tanti quante sono le features)
+        ('clustering', KMeans(n_clusters=n_clusters, random_state=42))  # Clustering con KMeans
     ])
-
-    # Applicazione del clustering e della riduzione dimensionale
-    pipeline.fit(encoded_features)
-
-    # Otteniamo le etichette dei cluster
-    labels = pipeline.named_steps['cluster'].labels_
-
-    # Trasformiamo i dati con TruncatedSVD
-    svd_data = pipeline.named_steps['svd'].transform(encoded_features)
-
-    return labels, svd_data, encoded_features
+    labels = pipeline.fit_predict(data)
+    svd_data = pipeline.named_steps['dim_reduction'].transform(data)
+    return labels, svd_data
 
 
 
-def execute_clustering(df):
+def execute_clustering(df:pd.DataFrame,n_clusters=4):
     """
     Metodo che esegue tutti i metodi del file clustering_execution
     :param df:
@@ -145,28 +101,28 @@ def execute_clustering(df):
 
     """
     print("Eseguo il clustering...")
-    df = remove_features(df)
+    df_cleaned = remove_features(df)
 
-    categorical_features = define_categorical_features()
+    categorical_features,numerical_features = define_features_types()
 
-    numerical_features = define_numerical_features()
+    df_processed, label_encoders = transform_and_preprocess_data(df_cleaned, categorical_features, numerical_features)
 
-    preprocessor = create_preprocessor(categorical_features, numerical_features)
+    # Calcolo del numero ottimale di cluster
+    print("Calcolo del numero ottimale di cluster...")
+    plot_elbow_method(df_processed, max_clusters=10)
 
-    df, encoded_features, feature_names = transform_features(df, preprocessor)
+    # Applicazione del clustering
+    print("Applicazione del clustering con KMeans...")
+    labels, svd_data = apply_clustering(df_processed,n_clusters=n_clusters)
 
-    labels, svd_data, encoded_features = apply_clustering(encoded_features)
     # Aggiungiamo le etichette e le componenti principali al dataframe originale
-    df['Cluster'] = labels
+    df_cleaned['Cluster'] = labels
 
-    print("Sto eseguendo l'Elbow Method...")
-    print("Attendi, mi ci vorrà del tempo... Prenditi un caffè")
-    #plot_elbow_method(encoded_features)
-
+    # Calcolo delle metriche e generazione dei plot, passando anche label_encoders
     print("Sto calcolando le metriche...")
-    compute_all_metrics(df, encoded_features, labels)
+    compute_all_metrics(df_cleaned,target_column='incremento',label_encoders=label_encoders)
 
-    return df
+    return df_cleaned,labels,svd_data
 
 
 
