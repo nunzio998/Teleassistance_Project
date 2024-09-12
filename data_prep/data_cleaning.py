@@ -18,13 +18,13 @@ def data_cleaning(df) -> pd.DataFrame:
     df = remove_disdette(df)
 
     # Identificazione e rimozione outliers dalle colonne specificate
-    #df = identify_and_remove_outliers(df, ['ora_inizio_erogazione', 'ora_fine_erogazione'])
+    df = identify_and_remove_outliers(df, ['data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione', 'ora_fine_erogazione'])
 
     # Gestione dei dati rumorosi nella colonna specificata
-    #df = smooth_noisy_data(df, 'ora_inizio_erogazione')
+    df = smooth_noisy_data(df, ['data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione', 'ora_fine_erogazione'])
 
     # Rimozione dei duplicati
-    #df = remove_duplicati(df)
+    df = remove_duplicati(df)
 
     #Ordina le date di erogazione del servizio
     df = ordina_date(df)
@@ -84,41 +84,83 @@ def remove_duplicati(df) -> pd.DataFrame:
     return df
 
 
-def smooth_noisy_data(df, column, window_size=3):
+def smooth_noisy_data(df, columns, window_size=3):
     """
-    Smooth noisy data using moving average.
+    La funzione ha il compito di smussare i dati rumorosi utilizzando la media mobile. La funzione viene applicata a feature e temporali.
     :param df: Il DataFrame originale.
     :param column: La colonna su cui applicare il smoothing.
     :param window_size: La dimensione della finestra per la media mobile.
     :return: Un DataFrame con i dati smussati.
     """
-    if pd.api.types.is_datetime64_any_dtype(df[column]):
-        # Convert datetime to timestamp
-        df[column] = df[column].apply(lambda x: x.timestamp() if pd.notnull(x) else x)
-        # Apply rolling mean
-        df[column] = df[column].rolling(window=window_size, min_periods=1).mean()
-        # Convert timestamp back to datetime
-        df[column] = pd.to_datetime(df[column], unit='s', utc=True)
-    else:
-        df[column] = df[column].rolling(window=window_size, min_periods=1).mean()
+    for column in columns:
+        if pd.api.types.is_datetime64_any_dtype(df[column]):
+            # Converto la colonna datetime in timestamp numerico
+            df[column] = pd.to_datetime(df[column], errors='coerce')
+            df[column] = df[column].map(pd.Timestamp.timestamp)
+
+            # Applico la funzione rolling().mean() sul dato numerico
+            df[column] = df[column].rolling(window=window_size, min_periods=1).mean()
+
+            # Riconverto il timestamp in datetime
+            df[column] = pd.to_datetime(df[column], unit='s')
+
+        elif pd.api.types.is_numeric_dtype(df[column]):
+            # Se la colonna è numerica, applico la funzione rolling().mean()
+            df[column] = df[column].rolling(window=window_size, min_periods=1).mean()
+
+        elif df[column].dtype == 'object':
+            try:
+                # Provo a convertire la colonna in datetime
+                df[column] = pd.to_datetime(df[column], errors='coerce')
+
+                # Se la conversione ha successo e la colonna è ora datetime
+                if pd.api.types.is_datetime64_any_dtype(df[column]):
+                    # Converto datetime in timestamp numerico
+                    df[column] = df[column].map(pd.Timestamp.timestamp)
+
+                    # Applico la funzione rolling().mean() sul dato numerico
+                    df[column] = df[column].rolling(window=window_size, min_periods=1).mean()
+
+                    # Riconverto il timestamp in datetime
+                    df[column] = pd.to_datetime(df[column], unit='s')
+                else:
+                    print(f"Colonna {column} non può essere convertita in datetime.")
+
+            except Exception as e:
+                print(f"Errore nella conversione della colonna {column} in datetime: {e}")
+        else:
+            print(f"La colonna {column} non è di tipo numerico o datetime, quindi non sarà trattata.")
 
     return df
 
 
-def identify_and_remove_outliers(df, columns):
+def identify_and_remove_outliers(df, columns, original_format='%Y-%m-%dT%H:%M:%S%z') -> pd.DataFrame:
     """
-    Identifica e rimuove outliers utilizzando il metodo IQR.
+    Identifica e rimuove outliers utilizzando il metodo IQR. La funzione viene applicata a feature e temporali.
+    :param original_format:
     :param df: Il DataFrame originale.
     :param columns: Le colonne su cui applicare la rimozione degli outliers.
     :return: Un DataFrame senza outliers.
     """
     for column in columns:
+        converted = False # Flag che uso per vedificare se gli elementi della feature sono stati convertiti da stringa a datetime
+
+        # Conversione della colonna in datetime, se necessario
+        if df[column].dtype == 'object':  # Se è una stringa
+            df[column] = pd.to_datetime(df[column], errors='coerce', utc=True)
+            converted = True
+
         Q1 = df[column].quantile(0.25)
         Q3 = df[column].quantile(0.75)
         IQR = Q3 - Q1
         lower_bound = Q1 - 1.5 * IQR
         upper_bound = Q3 + 1.5 * IQR
         df = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+
+        # Se in precedenza ho effettuato una conversione, ritorno al formato originale
+        if converted and df[column].dtype != 'object':
+            df[column] = df[column].dt.strftime(original_format)
+
     return df
 
 
