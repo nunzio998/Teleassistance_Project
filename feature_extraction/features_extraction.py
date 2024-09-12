@@ -62,7 +62,7 @@ def extract_eta_paziente(df):
 
 def remove_data_nascita(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Rimuove le feature 'ora_inizio_erogazione' e 'ora_fine_erogazione' dal dataFrame.
+    Rimuove la feature 'data_nascita' dal dataframe.
     :return: df senza le colonne specificate.
     """
     df.drop(columns=['data_nascita'], inplace=True)
