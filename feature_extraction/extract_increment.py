@@ -1,22 +1,25 @@
 import pandas as pd
 
+
 def dati_da_utilizzare(df):
     tipologie = df['tipologia_professionista_sanitario'].unique()
-    DaF=pd.read_parquet('datasets/df_aggregato.parquet')
-    # Lista degli intervalli di anni e mesi
+    DaF = pd.read_parquet('datasets/df_aggregato.parquet')
+    # Lista degli intervalli di anni e mesi in formato semestrale
     intervalli_anni_mesi = [
-        (2019, 2020, '1, 2, 3, 4'), (2019, 2020, '5, 6, 7, 8'), (2019, 2020, '9, 10, 11, 12'),
-        (2020, 2021, '1, 2, 3, 4'), (2020, 2021, '5, 6, 7, 8'), (2020, 2021, '9, 10, 11, 12'),
-        (2021, 2022, '1, 2, 3, 4'), (2021, 2022, '5, 6, 7, 8'), (2021, 2022, '9, 10, 11, 12')
+        (2019, 2020, '1, 2, 3, 4, 5, 6'),
+        (2019, 2020, '7, 8, 9, 10, 11, 12'),
+        (2020, 2021, '1, 2, 3, 4, 5, 6'),
+        (2020, 2021, '7, 8, 9, 10, 11, 12'),
+        (2021, 2022, '1, 2, 3, 4, 5, 6'),
+        (2021, 2022, '7, 8, 9, 10, 11, 12')
     ]
-    return tipologie , DaF, intervalli_anni_mesi
+    return tipologie, DaF, intervalli_anni_mesi
 
 def get_intervallo_mesi(mese):
     intervalli_mesi = {
-        (1, 2, 3, 4): '1, 2, 3, 4',
-        (5, 6, 7, 8): '5, 6, 7, 8',
-        (9, 10, 11, 12): '9, 10, 11, 12'
-    }
+            (1, 2, 3, 4, 5, 6): '1, 2, 3, 4, 5, 6',
+            (7, 8, 9, 10, 11, 12): '7, 8, 9, 10, 11, 12'
+        }
 
     for mesi, intervallo in intervalli_mesi.items():
         if mese in mesi:
