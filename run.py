@@ -88,4 +88,20 @@ dtype: int64
 #TODO: Visualizzare le metriche di clustering
 #TODO: Grafici generali
 
+'''
+Calcolo della purezza di ciascun cluster e della purezza complessiva:
+Purezza di ciascun cluster:
+Cluster 2: Purezza = 0.99
+Cluster 0: Purezza = 0.53
+Cluster 3: Purezza = 0.89
+Cluster 1: Purezza = 1.00
+Purezza complessiva: 0.83
 
+
+Calcolo dell'indice di Silhouette... Attendi...
+L'indice di Silhouette medio normalizzato è : 0.7405819883564095
+
+Calcolo della metrica finale...
+La metrica finale è : 0.5858758156998034
+La metrica finale è: 0.59
+'''

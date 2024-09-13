@@ -20,13 +20,12 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     features_to_drop = [
         'id_prenotazione', 'id_paziente', 'asl_residenza', 'comune_residenza', 'descrizione_attivita',
         'asl_erogazione', 'codice_struttura_erogazione', 'provincia_residenza', 'provincia_erogazione',
-        'struttura_erogazione', 'tipologia_struttura_erogazione', 'id_professionista_sanitario',
-        'tipologia_professionista_sanitario'
+        'struttura_erogazione', 'tipologia_struttura_erogazione', 'id_professionista_sanitario'
     ]
     return df.drop(columns=[col for col in features_to_drop if col in df.columns])
 
 def define_features_types() -> (list, list):
-    categorical_features = ['sesso', 'regione_residenza', 'provincia_residenza', 'regione_erogazione', 'incremento']
+    categorical_features = ['sesso', 'regione_residenza', 'provincia_residenza', 'regione_erogazione','tipologia_professionista_sanitario', 'incremento']
     numerical_features = ['eta_paziente', 'durata_televisita', 'year', 'month']
     return categorical_features, numerical_features
 
