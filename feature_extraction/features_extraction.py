@@ -5,18 +5,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def extract_durata_televisita(df):
-    # Calcolare la durata della televisita
+    """
+    Calcola la durata della televisita.
+    Args:
+        df: dataFrame
+   Returns:
+       df: dataFrame che associa ad ogni campione la durata della televisita
+     """
+
     # Assicurarsi che 'ora_inizio_erogazione' e 'ora_fine_erogazione' siano in formato datetime
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce')
     df['ora_fine_erogazione'] = pd.to_datetime(df['ora_fine_erogazione'], errors='coerce')
-
-    # Funzione per calcolare la durata della televisita
-
     def calcola_durata(row):
         """
         Calcola la durata della televisita in secondi tra 'ora_inizio_erogazione' e 'ora_fine_erogazione'.
-        :param row: Una riga del DataFrame.
-        :return: Durata in secondi.
+        Args:
+            row: Una riga del DataFrame.
+        Returns:
+            durata: Durata in secondi.
         """
         if pd.notnull(row['ora_inizio_erogazione']) and pd.notnull(row['ora_fine_erogazione']):
             durata = row['ora_fine_erogazione'] - row['ora_inizio_erogazione']
@@ -24,8 +30,6 @@ def extract_durata_televisita(df):
         else:
             return None
 
-    # Calcolare la durata in minuti
-    #df['durata_televisita'] = (df['ora_fine_erogazione'] - df['ora_inizio_erogazione']).dt.total_seconds() / 60
     df['durata_televisita'] = df.apply(calcola_durata, axis=1)
 
     return df
@@ -34,21 +38,36 @@ def extract_durata_televisita(df):
 def remove_ora_erogazione(df: pd.DataFrame) -> pd.DataFrame:
     """
     Rimuove le feature 'ora_inizio_erogazione' e 'ora_fine_erogazione' dal dataFrame.
-    :return: df senza le colonne specificate.
+    Args:
+        df: dataFrame
+    Returns:
+        df: dataFrame senza le colonne specificate.
     """
     df.drop(columns=['ora_inizio_erogazione', 'ora_fine_erogazione'], inplace=True)
     return df
 
 
 def extract_eta_paziente(df):
+    """
+    Estrae l'età del paziente.
+    Args:
+        df: dataFrame
+    Returns:
+        df: dataFrame con la colonna 'età'
+    """
     # Assicurarsi che 'data_nascita' sia in formato datetime
     df['data_nascita'] = pd.to_datetime(df['data_nascita'], errors='coerce')
 
     # Calcolare l'età in anni
     current_date = datetime.now()
-
-    # Funzione per calcolare l'età
     def calcola_eta(row):
+        """
+        Calcola l'età.
+        Args:
+            row: Una riga del DataFrame.
+        Returns:
+            age: età del paziente.
+        """
         birth_date = row['data_nascita']
         if pd.isnull(birth_date):
             return None
@@ -63,22 +82,22 @@ def extract_eta_paziente(df):
 def remove_data_nascita(df: pd.DataFrame) -> pd.DataFrame:
     """
     Rimuove la feature 'data_nascita' dal dataframe.
-    :return: df senza le colonne specificate.
+    Args:
+        df: dataFrame
+    Returns:
+        df: dataFrame senza la colonna 'data_nascita'
     """
     df.drop(columns=['data_nascita'], inplace=True)
     return df
 
 
-
 def extract_year_and_month(df):
     """
     Estrae l'anno e il mese dalla colonna 'data_erogazione' e crea le nuove colonne 'year' e 'month' nel DataFrame.
-
-    Parametri:
-    df (DataFrame): Il DataFrame originale contenente la colonna 'data_erogazione'.
-
-    Ritorna:
-    DataFrame: Il DataFrame originale con le nuove colonne 'year' e 'month'.
+     Args:
+        df: dataFrame originale contenente la colonna 'data_erogazione'.
+    Returns:
+        df: dataFrame originale con le nuove colonne 'year' e 'month'.
     """
     # Assicurati che la colonna 'data_erogazione' sia nel formato datetime
     df['data_erogazione'] = pd.to_datetime(df['data_erogazione'], errors='coerce')
@@ -90,18 +109,16 @@ def extract_year_and_month(df):
     return df
 
 def save_grouped_by_year_and_month(df, directory='month_dataset'):
-    '''
-    Questa funzione estrae l'anno e il mese dalla colonna 'data_erogazione' di un DataFrame,
-    crea nuove colonne 'year' e 'month', e poi raggruppa il DataFrame per anno e mese.
-    Ogni gruppo viene salvato in un file Parquet separato nella directory 'month_dataset'.
-    Successivamente, la funzione carica automaticamente tutti i file Parquet nella directory.
 
-    Parametri:
-    df (DataFrame): Il DataFrame originale contenente la colonna 'data_erogazione'.
+    """
+    Raggruppa il DataFrame per anno e mese e salva ogni gruppo in un file Parquet separato
+    nella directory 'month_dataset'.
 
-    Ritorna:
-    DataFrame: Il DataFrame originale con le nuove colonne 'year' e 'month'.
-    '''
+    Args:
+        df: dataFrame originale contenente la colonna 'data_erogazione'.
+    Returns:
+        df: dataFrame con le nuove colonne 'year' e 'month'.
+    """
     # Crea la directory se non esiste
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -122,22 +139,24 @@ def save_grouped_by_year_and_month(df, directory='month_dataset'):
     return df
 
 def conta_professionisti_per_mese(cartella):
+
     """
-    Conta per ogni mese (file Parquet) il numero di volte in cui compare ogni professionista sanitario.
+    Conta per ogni mese il numero di volte in cui compare ogni professionista sanitario.
 
     Args:
-    cartella (str): Il percorso della cartella contenente i file Parquet.
-
+        cartella (str): percorso della cartella contenente i file Parquet divisi per mese e anno.
     Returns:
-    pd.DataFrame: Un DataFrame contenente il numero di occorrenze per ogni tipologia di professionista
-                  per ogni mese.
+        df_aggregato: dataFrame contenente il numero di occorrenze per ogni tipologia di professionista
+                      sanitario per ogni mese.
     """
     dati_aggregati = []
     def conta_occorrenze_professionisti(df, colonna='tipologia_professionista_sanitario'):
         """
         Conta il numero di occorrenze di ciascuna tipologia di professionista sanitario in un DataFrame.
+
         """
         return df[colonna].value_counts()
+
     # Scorri tutti i file Parquet nella cartella
     for file in os.listdir(cartella):
         if file.endswith(".parquet"):
@@ -172,9 +191,11 @@ def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, t
     Crea e salva il grafico a barre mensile per una specifica tipologia di professionista sanitario.
 
     Args:
-    df_professionista (pd.DataFrame): Il DataFrame filtrato per la tipologia specificata.
-    tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
-    tipologia_dir (str): La directory dove salvare i grafici.
+        df_professionista: dataFrame filtrato per la tipologia di professionista sanitario specificata
+        tipologia_professionista (str): tipologia di professionista sanitario
+        tipologia_dir (str): directory dove salvare i grafici
+    Returns:
+        None
     """
     # Percorso del file del grafico
     output_path = os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png')
@@ -205,9 +226,9 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
     Crea e salva gli istogrammi annuali per una specifica tipologia di professionista sanitario.
 
     Args:
-    df_professionista (pd.DataFrame): Il DataFrame filtrato per la tipologia specificata.
-    tipologia_professionista (str): La tipologia di professionista sanitario con caratteri non validi sostituiti.
-    tipologia_dir (str): La directory dove salvare i grafici.
+        df_professionista: dataFrame filtrato per la tipologia specificata
+        tipologia_professionista (str): tipologia di professionista sanitario
+        tipologia_dir (str): directory dove salvare i grafici
     """
     # Estrai gli anni disponibili nel DataFrame
     anni = df_professionista['anno'].unique()
@@ -242,15 +263,12 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
         plt.savefig(output_path)
         plt.close()
 
-
-
 def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
     """
     Crea e salva grafici a barre e istogrammi per ogni tipologia di professionista sanitario.
-
     Args:
-    df_aggregato (pd.DataFrame): Il DataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
-    output_dir (str): La directory principale dove salvare i grafici.
+        df_aggregato: dataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
+        output_dir (str): directory principale dove salvare i grafici.
     """
     # Creare la cartella principale se non esiste
     if not os.path.exists(output_dir):
@@ -283,7 +301,8 @@ def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
 
 def feature_extraction(df):
     """
-    Aggiunge nuove features al DataFrame: età del paziente e durata della televisita.
+    Aggiunge nuove features al DataFrame, elimina quelle ridondanti, divide
+     età del paziente e durata della televisita.
     :param df: Il DataFrame originale.
     :return: Il DataFrame con le nuove features.
     """
@@ -291,20 +310,16 @@ def feature_extraction(df):
     # Calcola l'età del paziente e rimuove la colonna 'data_nascita'
     df = extract_eta_paziente(df)
     df = remove_data_nascita(df)
-    print("Eliminazione della feature: data_nascita")
 
     # Calcola la durata della televisita e rimuove le colonne dell'ora di inizio e fine erogazione
     df = extract_durata_televisita(df)
     df = remove_ora_erogazione(df)
-    print("Eliminazione della feature: ora_inizio_erogazione, ora_fine_erogazione")
 
-    # Divisione dataset per anno e mese, e salvataggio in file Parquet
+    # Divide il dataset per anno e mese, e crea grafici della richiesta di professionisti per ogni mese
     df = extract_year_and_month(df)
-
-
     save_grouped_by_year_and_month(df)
     df_aggregato = conta_professionisti_per_mese('month_dataset')
-    #crea_grafici_e_salva(df_aggregato)
+    crea_grafici_e_salva(df_aggregato)
 
     # Salva il DataFrame aggregato in un file Parquet per ulteriori analisi
     df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)

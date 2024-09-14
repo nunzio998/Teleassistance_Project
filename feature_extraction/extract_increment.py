@@ -12,9 +12,9 @@ def dati_da_utilizzare(df):
             intervalli_anni_mesi: lista di tuple che definiscono intervalli di anni e mesi in formato semestrale
         """
 
-    tipologie = df['tipologia_professionista_sanitario'].unique()  # estrae le tipologie uniche di professionista
+    tipologie = df['tipologia_professionista_sanitario'].unique()  # Estrae le tipologie uniche di professionista
 
-    DaF = pd.read_parquet('datasets/df_aggregato.parquet') # lettura del file contente le occorrenze
+    DaF = pd.read_parquet('datasets/df_aggregato.parquet')  # Lettura del file contente le occorrenze
 
     # Lista degli intervalli di anni e mesi in formato semestrale
     intervalli_anni_mesi = [
@@ -240,7 +240,7 @@ def incremento(df):
     # Salva il dataFrame esteso in un nuovo file
     risultato_esteso.to_parquet('datasets/df_incremento_percentuale_esteso.parquet', index=False)
 
-    # Unisci la colonna incremento al DataFrame originale: associa ad ogni campione una label "alta", "media", "bassa" o "costante"
+    # Unisce la colonna incremento al DataFrame originale: associa ad ogni campione una label "alta", "media", "bassa" o "costante"
     df_finale = unisci_incremento(df, risultato_esteso)
 
     # Elimina i campioni dell'anno 2019
