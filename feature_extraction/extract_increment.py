@@ -186,6 +186,19 @@ def estendi_incremento(df):
 
 
 def unisci_incremento(df_originale, risultato_esteso):
+    """
+    Unisce il DataFrame originale con il DataFrame esteso (risultato_esteso) basandosi sulle colonne
+    'tipologia_professionista_sanitario', 'year', e 'month'.In questo modo, l'incremento calcolato per
+     ogni combinazione di tipologia, anno e mese verrà aggiunto al DataFrame originale.
+
+      Args:
+        df_originale: dataFrame iniziale
+        risultato_esteso: dataFrame con incremento associato ad ogni mese
+
+    Returns:
+        df_unito: dataFrame in cui ogni campione ha associata una feature incremento
+    """
+
     # Unisci il DataFrame originale con il risultato esteso, mantenendo tipologia, anno e mese
     df_unito = pd.merge(df_originale,
                         risultato_esteso[['tipologia_professionista_sanitario', 'year', 'month', 'incremento']],
@@ -196,22 +209,41 @@ def unisci_incremento(df_originale, risultato_esteso):
 
     return df_unito
 
-def incremento(df):
 
+def incremento(df):
+    """
+    Funzione principale che calcola la variabile di incremento, estende i risultati per ciascun mese
+    e li unisce al DataFrame originale. Alla fine elimina i dati relativi all'anno 2019,
+    poiché l'incremento si applica solo a partire dal 2020.
+
+    Args:
+        df: DataFrame contenente i dati originali.
+
+    Returns:
+        df_finale: DataFrame finale con la variabile 'incremento' calcolata e unita ai dati originali.
+        """
+
+    # Definisco i dati da utilizzare
     tipologie, DaF, intervalli_anni_mese = dati_da_utilizzare(df)
+
     print("Calcolo la variabile incremento...")
+
+    # Calcola le occorrenze totali di ogni professionista per l'intervallo di mesi specificato
     risultato = somma_per_intervallo_mesi(DaF, tipologie)
+
+    # Calcola l'incremento fra anni successivi e associa ad ogni anno una label  "alta", "media", "bassa" o "costante"
     risultato_con_incremento = calcola_incremento(risultato, intervalli_anni_mese)
+
+    # Associa la label "alta", "media", "bassa" o "costante" ad ogni mese
     risultato_esteso = estendi_incremento(risultato_con_incremento)
 
-    # Salva il DataFrame esteso in un nuovo file
+    # Salva il dataFrame esteso in un nuovo file
     risultato_esteso.to_parquet('datasets/df_incremento_percentuale_esteso.parquet', index=False)
-    #print(risultato_esteso.head(500).to_string())
 
-    # Unisci la colonna incremento al DataFrame originale
+    # Unisci la colonna incremento al DataFrame originale: associa ad ogni campione una label "alta", "media", "bassa" o "costante"
     df_finale = unisci_incremento(df, risultato_esteso)
 
-    # Elimina tutte le righe dove l'anno è 2019
+    # Elimina i campioni dell'anno 2019
     df_finale = df_finale[df_finale['year'] != 2019]
 
     return df_finale
