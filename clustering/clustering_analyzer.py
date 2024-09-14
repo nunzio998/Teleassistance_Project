@@ -35,7 +35,6 @@ def plot_categorical_features(df, categorical_features, reverse_mapping):
         if feature in reverse_mapping:
             handles, labels = plt.gca().get_legend_handles_labels()
             new_labels = []
-
             for label in labels:
                 try:
                     # Cerca di convertire l'etichetta in un numero e usare la mappatura

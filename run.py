@@ -5,46 +5,29 @@ from feature_extraction.features_extraction import feature_extraction
 from feature_extraction.extract_increment import incremento
 from clustering.clustering_execution import execute_clustering
 
-# Configura pandas per visualizzare un DataFrame senza limiti di spazio
-pd.set_option('display.max_rows', None)  # Nessun limite sul numero di righe
-pd.set_option('display.max_columns', None)  # Nessun limite sul numero di colonne
-pd.set_option('display.max_colwidth', None)  # Nessun limite sulla larghezza delle colonne
-pd.set_option('display.expand_frame_repr', False)  # Non espande il DataFrame su più righe
-
 # Caricamento del dataset
 file_path = 'datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
 
-# Visualizzazione del numero di righe e colonne del dataset
-num_rows, num_columns = df.shape
-print(f" Inizialmente il DataFrame ha {num_rows} righe e {num_columns} colonne.")
-
-# Data Cleaning
+# STEP 1: Data Cleaning
 df = data_cleaning(df)
-# Features Selection
+
+# STEP 2: Features Selection
 df = feature_selection_execution(df)
-# Feature extraction
+
+# STEP 3: Feature extraction
 df = feature_extraction(df)
 
-# Visualizzazione del numero di righe e colonne del dataset
-num_rows, num_columns = df.shape
-print(f" Dopo la pulizia dei dati, il DataFrame ha {num_rows} righe e {num_columns} colonne.")
-
-#df.to_csv('datasets/challenge_campus_biomedico_2024_imputed_selected_extracted.csv', index=False)
-
-# Calcolo la variabile incremento
+# STEP 4: Calcolo dell'incremento
 df = incremento(df)
 
-# Elimina tutte le righe dove l'anno è 2019
-df = df[df['year'] != 2019]
-df.to_parquet('datasets/CMA.parquet', index=False)
+# STEP 5: Clustering Execution
+df_clustered, cluster_labels, svd_transformed_data = execute_clustering(df , n_clusters=4)
 
-# Eseguo il clustering
-df_clustered, cluster_labels, svd_transformed_data = execute_clustering(df,n_clusters=4)
 
-# Visualizzazione del numero di righe e colonne del dataset
-num_rows, num_columns = df.shape
-print(f" Dopo il clustering, il DataFrame ha {num_rows} righe e {num_columns} colonne.")
+
+
+
 
 
 
@@ -102,4 +85,9 @@ L'indice di Silhouette medio normalizzato è : 0.7405819883564095
 Calcolo della metrica finale...
 La metrica finale è : 0.5858758156998034
 La metrica finale è: 0.59
+
+#TODO
+1. Cambio gli if per il valore dell'incremento
+
+
 '''

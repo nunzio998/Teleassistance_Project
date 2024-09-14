@@ -1,9 +1,20 @@
 import pandas as pd
 
-
 def dati_da_utilizzare(df):
-    tipologie = df['tipologia_professionista_sanitario'].unique()
+    """
+    Definisce i dati da utilizzare per calcolare l'incremento
+
+    Args:
+            df: DataFrame contenente i dati iniziali
+    Returns:
+            tipologie: lista delle tipologie di professionista sanitario
+            DaF: DataFrame che contiene il numero di occorrenze di ogni professionista sanitario per mese
+            intervalli_anni_mesi: lista di tuple che definiscono intervalli di anni e mesi in formato semestrale
+        """
+
+    tipologie = df['tipologia_professionista_sanitario'].unique()  #estrae le tipologie uniche di professionista
     DaF = pd.read_parquet('datasets/df_aggregato.parquet')
+
     # Lista degli intervalli di anni e mesi in formato semestrale
     intervalli_anni_mesi = [
         (2019, 2020, '1, 2, 3, 4, 5, 6'),
@@ -16,18 +27,37 @@ def dati_da_utilizzare(df):
     return tipologie, DaF, intervalli_anni_mesi
 
 def get_intervallo_mesi(mese):
+    """
+    Restituisce l'intervallo di mesi a cui appartiene il mese specificato.
+
+    Args:
+           mese: Mese per il quale si desidera ottenere l'intervallo
+    Returns:
+           intervallo: Intervallo di mesi in cui il mese rientra
+       """
     intervalli_mesi = {
             (1, 2, 3, 4, 5, 6): '1, 2, 3, 4, 5, 6',
             (7, 8, 9, 10, 11, 12): '7, 8, 9, 10, 11, 12'
         }
-
     for mesi, intervallo in intervalli_mesi.items():
         if mese in mesi:
             return intervallo
-
     return "Intervallo non trovato"
 
 def somma_per_intervallo_mesi(df, tipologie):
+    """
+       Calcola la somma delle occorrenze di ogni professionista sanitario per l'intervallo di
+       mesi specificato (semestre)
+
+       Args:
+           df: DataFrame contenente i dati
+           tipologie: Lista di tipologie di professionisti sanitari
+
+       Returns:
+           risultato: DataFrame con la somma delle occorrenze per tipologia, anno e intervallo di mesi
+       """
+
+
     # Aggiungi una colonna per l'intervallo di mesi
     df['intervallo_mesi'] = df['mese'].apply(get_intervallo_mesi)
 
@@ -78,14 +108,15 @@ def classifica_incremento(percentuale):
     Returns:
     str: La classificazione dell'incremento ('alta', 'media', 'costante', 'bassa').
     """
-    if percentuale > 70:
-        return 'alta'
-    elif 35 < percentuale <= 70:
-        return 'media'
+
+    if percentuale < 0:
+        return 'costante'
     elif 0 <= percentuale <= 35:
         return 'bassa'
-    elif percentuale < 0:
-        return 'costante'
+    elif 35 < percentuale <= 80:
+        return 'media'
+    else:
+        return 'alta'
 
 
 
@@ -144,6 +175,9 @@ def incremento(df):
 
     # Unisci la colonna incremento al DataFrame originale
     df_finale = unisci_incremento(df, risultato_esteso)
+
+    # Elimina tutte le righe dove l'anno è 2019
+    df_finale = df_finale[df_finale['year'] != 2019]
 
     return df_finale
 
