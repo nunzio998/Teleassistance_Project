@@ -60,7 +60,7 @@ def transform_and_preprocess_data(df: pd.DataFrame, categorical_features: list, 
     for col in ['data_contatto', 'data_erogazione']:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors='coerce', utc=True)
-            df[col] = df[col].astype(int) // 10 ** 9  # Convert to UNIX timestamp safely
+            df[col] = df[col].astype('int64') // 10 ** 9  # Convert to UNIX timestamp safely
 
     # Applica LabelEncoder a ciascuna colonna categorica
     for col in categorical_features:
