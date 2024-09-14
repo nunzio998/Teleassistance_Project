@@ -7,22 +7,17 @@ import seaborn as sns
 def extract_durata_televisita(df):
     """
     Calcola la durata della televisita.
-    Args:
-        df: dataFrame
-   Returns:
-       df: dataFrame che associa ad ogni campione la durata della televisita
+    :param df: dataFrame
+    :return: dataFrame che associa ad ogni campione la durata della televisita
      """
-
     # Assicurarsi che 'ora_inizio_erogazione' e 'ora_fine_erogazione' siano in formato datetime
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce')
     df['ora_fine_erogazione'] = pd.to_datetime(df['ora_fine_erogazione'], errors='coerce')
     def calcola_durata(row):
         """
         Calcola la durata della televisita in secondi tra 'ora_inizio_erogazione' e 'ora_fine_erogazione'.
-        Args:
-            row: Una riga del DataFrame.
-        Returns:
-            durata: Durata in secondi.
+        :param row: una riga del DataFrame
+        :return: durata in secondi
         """
         if pd.notnull(row['ora_inizio_erogazione']) and pd.notnull(row['ora_fine_erogazione']):
             durata = row['ora_fine_erogazione'] - row['ora_inizio_erogazione']
@@ -38,10 +33,8 @@ def extract_durata_televisita(df):
 def remove_ora_erogazione(df: pd.DataFrame) -> pd.DataFrame:
     """
     Rimuove le feature 'ora_inizio_erogazione' e 'ora_fine_erogazione' dal dataFrame.
-    Args:
-        df: dataFrame
-    Returns:
-        df: dataFrame senza le colonne specificate.
+    :param df: dataFrame
+    :return df: dataFrame senza le colonne specificate.
     """
     df.drop(columns=['ora_inizio_erogazione', 'ora_fine_erogazione'], inplace=True)
     return df
@@ -50,10 +43,8 @@ def remove_ora_erogazione(df: pd.DataFrame) -> pd.DataFrame:
 def extract_eta_paziente(df):
     """
     Estrae l'età del paziente.
-    Args:
-        df: dataFrame
-    Returns:
-        df: dataFrame con la colonna 'età'
+    :param df: dataFrame
+    :return df: dataFrame con la colonna 'età'
     """
     # Assicurarsi che 'data_nascita' sia in formato datetime
     df['data_nascita'] = pd.to_datetime(df['data_nascita'], errors='coerce')
@@ -63,10 +54,8 @@ def extract_eta_paziente(df):
     def calcola_eta(row):
         """
         Calcola l'età.
-        Args:
-            row: Una riga del DataFrame.
-        Returns:
-            age: età del paziente.
+        :param row: una riga del DataFrame.
+        :return age: età del paziente.
         """
         birth_date = row['data_nascita']
         if pd.isnull(birth_date):
@@ -82,10 +71,8 @@ def extract_eta_paziente(df):
 def remove_data_nascita(df: pd.DataFrame) -> pd.DataFrame:
     """
     Rimuove la feature 'data_nascita' dal dataframe.
-    Args:
-        df: dataFrame
-    Returns:
-        df: dataFrame senza la colonna 'data_nascita'
+    :param df: dataFrame
+    :return df: dataFrame senza la colonna 'data_nascita'
     """
     df.drop(columns=['data_nascita'], inplace=True)
     return df
@@ -94,10 +81,8 @@ def remove_data_nascita(df: pd.DataFrame) -> pd.DataFrame:
 def extract_year_and_month(df):
     """
     Estrae l'anno e il mese dalla colonna 'data_erogazione' e crea le nuove colonne 'year' e 'month' nel DataFrame.
-     Args:
-        df: dataFrame originale contenente la colonna 'data_erogazione'.
-    Returns:
-        df: dataFrame originale con le nuove colonne 'year' e 'month'.
+    :param df: dataFrame originale contenente la colonna 'data_erogazione'
+    :return df: dataFrame originale con le nuove colonne 'year' e 'month'
     """
     # Assicurati che la colonna 'data_erogazione' sia nel formato datetime
     df['data_erogazione'] = pd.to_datetime(df['data_erogazione'], errors='coerce')
@@ -113,11 +98,8 @@ def save_grouped_by_year_and_month(df, directory='month_dataset'):
     """
     Raggruppa il DataFrame per anno e mese e salva ogni gruppo in un file Parquet separato
     nella directory 'month_dataset'.
-
-    Args:
-        df: dataFrame originale contenente la colonna 'data_erogazione'.
-    Returns:
-        df: dataFrame con le nuove colonne 'year' e 'month'.
+    :param df: dataFrame originale contenente la colonna 'data_erogazione'
+    :return df: dataFrame con le nuove colonne 'year' e 'month'
     """
     # Crea la directory se non esiste
     if not os.path.exists(directory):
@@ -142,18 +124,17 @@ def conta_professionisti_per_mese(cartella):
 
     """
     Conta per ogni mese il numero di volte in cui compare ogni professionista sanitario.
-
-    Args:
-        cartella (str): percorso della cartella contenente i file Parquet divisi per mese e anno.
-    Returns:
-        df_aggregato: dataFrame contenente il numero di occorrenze per ogni tipologia di professionista
-                      sanitario per ogni mese.
+    :param cartella (str): percorso della cartella contenente i file Parquet divisi per mese e anno.
+    :return df_aggregato: dataFrame contenente il numero di occorrenze per ogni tipologia di professionista
+                          sanitario per ogni mese.
     """
     dati_aggregati = []
     def conta_occorrenze_professionisti(df, colonna='tipologia_professionista_sanitario'):
         """
         Conta il numero di occorrenze di ciascuna tipologia di professionista sanitario in un DataFrame.
-
+        :param df: dataFrame
+        :param colonna: colonna relativa alla tipologia di professionista sanitario
+        :return: conteggio delle occorrenze per ogni tipologia di professionista sanitario
         """
         return df[colonna].value_counts()
 
@@ -189,13 +170,10 @@ def conta_professionisti_per_mese(cartella):
 def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
     Crea e salva il grafico a barre mensile per una specifica tipologia di professionista sanitario.
-
-    Args:
-        df_professionista: dataFrame filtrato per la tipologia di professionista sanitario specificata
-        tipologia_professionista (str): tipologia di professionista sanitario
-        tipologia_dir (str): directory dove salvare i grafici
-    Returns:
-        None
+    :param df_professionista: dataFrame filtrato per la tipologia di professionista sanitario specificata
+    :param tipologia_professionista (str): tipologia di professionista sanitario
+    :param tipologia_dir (str): directory dove salvare i grafici
+    :return None
     """
     # Percorso del file del grafico
     output_path = os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png')
@@ -224,11 +202,9 @@ def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, t
 def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
     Crea e salva gli istogrammi annuali per una specifica tipologia di professionista sanitario.
-
-    Args:
-        df_professionista: dataFrame filtrato per la tipologia specificata
-        tipologia_professionista (str): tipologia di professionista sanitario
-        tipologia_dir (str): directory dove salvare i grafici
+    :param df_professionista: dataFrame filtrato per la tipologia specificata
+    :param tipologia_professionista (str): tipologia di professionista sanitario
+    :param tipologia_dir (str): directory dove salvare i grafici
     """
     # Estrai gli anni disponibili nel DataFrame
     anni = df_professionista['anno'].unique()
@@ -266,9 +242,8 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
 def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
     """
     Crea e salva grafici a barre e istogrammi per ogni tipologia di professionista sanitario.
-    Args:
-        df_aggregato: dataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
-        output_dir (str): directory principale dove salvare i grafici.
+    :param df_aggregato: dataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
+    :param output_dir (str): directory principale dove salvare i grafici.
     """
     # Creare la cartella principale se non esiste
     if not os.path.exists(output_dir):
@@ -301,10 +276,10 @@ def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
 
 def feature_extraction(df):
     """
-    Aggiunge nuove features al DataFrame, elimina quelle ridondanti, divide
-     età del paziente e durata della televisita.
-    :param df: Il DataFrame originale.
-    :return: Il DataFrame con le nuove features.
+    Aggiunge nuove features al DataFrame, elimina quelle ridondanti e crea dei grafici
+    della richiesta di ogni professionista sanitario per ogni mese.
+    :param df: dataFrame
+    :return df: dataFrame
     """
 
     # Calcola l'età del paziente e rimuove la colonna 'data_nascita'

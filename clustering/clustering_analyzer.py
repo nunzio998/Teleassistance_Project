@@ -3,6 +3,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def plot_numerical_features(df, numerical_features):
+    """
+       Crea boxplot per ogni feature numerica specificata e li salva in una cartella chiamata 'graphs'.
+
+       Args:
+           df: DataFrame contenente i dati di clustering.
+           numerical_features: Lista di feature numeriche che si desidera visualizzare.
+
+       Returns:
+           None: I grafici vengono salvati come file PNG.
+       """
     for feature in numerical_features:
         plt.figure(figsize=(10, 6))
         sns.boxplot(x='Cluster', y=feature, data=df)
@@ -57,9 +67,6 @@ def plot_categorical_features(df, categorical_features, reverse_mapping):
         plt.close()
 
 
-
-
-
 def analyze_clustering(df, numerical_features, categorical_features,reverse_mapping):
 
     # Generazione di grafici per caratteristiche numeriche
@@ -71,3 +78,11 @@ def analyze_clustering(df, numerical_features, categorical_features,reverse_mapp
     plot_categorical_features(df, categorical_features,reverse_mapping)
 
     return
+
+
+"""
+Considerazioni:
+1. Durata televisita infermiere: se è inferiore a un tot, vuol dire che non aveva bisogno di infermiere
+ e lo ha reindirizzato?
+
+"""
