@@ -191,8 +191,8 @@ def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='increme
         plot_pca_components(pca_data, df['Cluster'])
 
     print("\nCalcolo la metrica finale...")
-    final_metric = compute_final_metric(purity_score, num_clusters=len(df['Cluster'].unique()))
-    print("\nLa metrica finale è : {final_metric:.2f}")
+    final_metric = compute_final_metric(purity_score,silhouette_score, num_clusters=len(df['Cluster'].unique()))
+    print(f"\nLa metrica finale è : {final_metric:.2f}")
 
 
 

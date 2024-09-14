@@ -5,6 +5,7 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, LabelEncoder
+from clustering.clustering_analyzer import analyze_clustering
 from clustering.clustering_metrics import compute_all_metrics
 
 
@@ -20,13 +21,13 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     features_to_drop = [
         'id_prenotazione', 'id_paziente', 'asl_residenza', 'comune_residenza', 'descrizione_attivita',
         'asl_erogazione', 'codice_struttura_erogazione', 'provincia_residenza', 'provincia_erogazione',
-        'struttura_erogazione', 'tipologia_struttura_erogazione', 'id_professionista_sanitario'
+        'struttura_erogazione', 'id_professionista_sanitario'
     ]
     return df.drop(columns=[col for col in features_to_drop if col in df.columns])
 
 def define_features_types() -> (list, list):
-    categorical_features = ['sesso', 'regione_residenza', 'provincia_residenza', 'regione_erogazione','tipologia_professionista_sanitario', 'incremento']
-    numerical_features = ['eta_paziente', 'durata_televisita', 'year', 'month']
+    categorical_features = ['sesso', 'regione_residenza', 'regione_erogazione','tipologia_professionista_sanitario', 'incremento', 'tipologia_struttura_erogazione']
+    numerical_features = ['eta_paziente', 'month', 'year']
     return categorical_features, numerical_features
 
 def plot_elbow_method(data, max_clusters=10):
@@ -55,6 +56,7 @@ def plot_elbow_method(data, max_clusters=10):
 
 def transform_and_preprocess_data(df: pd.DataFrame, categorical_features: list, numerical_features: list):
     label_encoders = {}
+    reverse_mapping = {}
 
     # Gestione delle colonne temporali (convertire in timestamp con utc=True)
     for col in ['data_contatto', 'data_erogazione']:
@@ -68,12 +70,15 @@ def transform_and_preprocess_data(df: pd.DataFrame, categorical_features: list, 
             le = LabelEncoder()
             df[col] = le.fit_transform(df[col])
             label_encoders[col] = le
+            # Aggiungi la mappatura inversa per ogni feature categorica
+            reverse_mapping[col] = {i: label for i, label in enumerate(le.classes_)}
 
     # Verifica che tutte le colonne siano numeriche dopo l'encoding
     if not all(np.issubdtype(df[col].dtype, np.number) for col in df.columns):
         raise ValueError("Ci sono ancora colonne non numeriche nel DataFrame dopo l'encoding.")
 
-    return df, label_encoders  # Restituisco il dizionario label_encoders
+    return df, label_encoders, reverse_mapping  # Restituisco anche il dizionario reverse_mapping
+
 
 
 def apply_clustering(data, n_clusters=4, n_components=None):
@@ -92,19 +97,19 @@ def apply_clustering(data, n_clusters=4, n_components=None):
 
 
 
-def execute_clustering(df:pd.DataFrame,n_clusters=4):
+def execute_clustering(df: pd.DataFrame, n_clusters=4):
     """
     Metodo che esegue tutti i metodi del file clustering_execution
     :param df:
     :return: df
-
     """
     print("Eseguo il clustering...")
     df_cleaned = remove_features(df)
 
-    categorical_features,numerical_features = define_features_types()
+    categorical_features, numerical_features = define_features_types()
 
-    df_processed, label_encoders = transform_and_preprocess_data(df_cleaned, categorical_features, numerical_features)
+    # Ora otteniamo anche reverse_mapping
+    df_processed, label_encoders, reverse_mapping = transform_and_preprocess_data(df_cleaned, categorical_features, numerical_features)
 
     # Calcolo del numero ottimale di cluster
     print("Calcolo del numero ottimale di cluster...")
@@ -112,16 +117,22 @@ def execute_clustering(df:pd.DataFrame,n_clusters=4):
 
     # Applicazione del clustering
     print("Applicazione del clustering con KMeans...")
-    labels, svd_data = apply_clustering(df_processed,n_clusters=n_clusters)
+    labels, svd_data = apply_clustering(df_processed, n_clusters=n_clusters)
 
     # Aggiungiamo le etichette e le componenti principali al dataframe originale
     df_cleaned['Cluster'] = labels
 
-    # Calcolo delle metriche e generazione dei plot, passando anche label_encoders
-    print("Sto calcolando le metriche...")
-    compute_all_metrics(df_cleaned,target_column='incremento',label_encoders=label_encoders)
+    # Analisi del clustering, con la possibilità di usare reverse_mapping nei grafici
+    analyze_clustering(df_cleaned, numerical_features, categorical_features, reverse_mapping)
 
-    return df_cleaned,labels,svd_data
+    # Calcolo delle metriche e generazione dei plot, passando anche label_encoders e reverse_mapping
+    print("Sto calcolando le metriche...")
+    compute_all_metrics(df_cleaned, target_column='incremento', label_encoders=label_encoders)
+
+
+
+    return df_cleaned, labels, svd_data
+
 
 
 
