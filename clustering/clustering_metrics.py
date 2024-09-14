@@ -4,17 +4,27 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from sklearn.metrics import silhouette_samples
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
-
-def compute_silhouette_score(encoded_features, labels):
+def compute_silhouette_score(df: pd.DataFrame):
     """
     Calcola e restituisce il Silhouette Score per il clustering effettuato,
     normalizzato nel range [0, 1].
 
-    :param encoded_features: Array di feature codificate (input del clustering)
-    :param labels: Etichette dei cluster generate dal modello K-Means
+    :param df: DataFrame con i dati (inclusa la colonna 'Cluster')
     :return: Valore normalizzato del Silhouette Score
     """
+
+    # Rimuoviamo la colonna Cluster dalle feature per il calcolo del silhouette
+    encoded_features = df.drop(columns=['Cluster'])
+    labels = df['Cluster']
+
+    # Convertiamo le colonne categoriali in numeriche utilizzando LabelEncoder
+    for col in encoded_features.columns:
+        if encoded_features[col].dtype == 'object' or encoded_features[col].dtype.name == 'category':
+            le = LabelEncoder()
+            encoded_features[col] = le.fit_transform(encoded_features[col])
+
     # Calcola i valori del silhouette per ciascun campione
     silhouette_values = silhouette_samples(encoded_features, labels)
 
@@ -171,7 +181,7 @@ def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='increme
     cluster_purity, purity_score = compute_purity(df, target_column)
 
     print("\nCalcolo dell'indice di Silhouette... Attendi...")
-    #silhouette_score = compute_silhouette_score(encoded_features,labels)
+    silhouette_score = compute_silhouette_score(df)
 
     # Plot della purezza dei cluster
     plot_purity_bars(cluster_purity, purity_score)
@@ -180,9 +190,9 @@ def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='increme
     if pca_data is not None:
         plot_pca_components(pca_data, df['Cluster'])
 
-    #print("\nCalcolo la metrica finale...")
-    #final_metric = compute_final_metric(purity_score, silhouette_score, num_clusters=4)
-    #print("\nLa metrica finale è : ", final_metric)
+    print("\nCalcolo la metrica finale...")
+    final_metric = compute_final_metric(purity_score, num_clusters=len(df['Cluster'].unique()))
+    print("\nLa metrica finale è : {final_metric:.2f}")
 
 
 
