@@ -12,8 +12,9 @@ def dati_da_utilizzare(df):
             intervalli_anni_mesi: lista di tuple che definiscono intervalli di anni e mesi in formato semestrale
         """
 
-    tipologie = df['tipologia_professionista_sanitario'].unique()  #estrae le tipologie uniche di professionista
-    DaF = pd.read_parquet('datasets/df_aggregato.parquet')
+    tipologie = df['tipologia_professionista_sanitario'].unique()  # estrae le tipologie uniche di professionista
+
+    DaF = pd.read_parquet('datasets/df_aggregato.parquet') # lettura del file contente le occorrenze
 
     # Lista degli intervalli di anni e mesi in formato semestrale
     intervalli_anni_mesi = [
@@ -47,7 +48,8 @@ def get_intervallo_mesi(mese):
 def somma_per_intervallo_mesi(df, tipologie):
     """
        Calcola la somma delle occorrenze di ogni professionista sanitario per l'intervallo di
-       mesi specificato (semestre)
+       mesi specificato (semestre). I risultati vengono raggruppati in un dataframe che ha come colonne
+       'tipologia_professionista_sanitario', 'anno', 'intervallo_mesi' e 'conteggio'.
 
        Args:
            df: DataFrame contenente i dati
@@ -57,35 +59,57 @@ def somma_per_intervallo_mesi(df, tipologie):
            risultato: DataFrame con la somma delle occorrenze per tipologia, anno e intervallo di mesi
        """
 
+    df['intervallo_mesi'] = df['mese'].apply(get_intervallo_mesi)  # Aggiungo la colonna 'intervallo_mesi'
 
-    # Aggiungi una colonna per l'intervallo di mesi
-    df['intervallo_mesi'] = df['mese'].apply(get_intervallo_mesi)
-
-    # Filtra i dati per le tipologie specificate
+    # Verifico che le tipolgie di professionista sanitario siano quelle estratte in precedenza
     df_filtrato = df[df['tipologia_professionista_sanitario'].isin(tipologie)]
 
-    # Raggruppa per tipologia, anno e intervallo di mesi, e somma i conteggi
+    # Raggruppa e somma le occorrenze dei dati che hanno stesso tipologia di professionista sanitario, anno e intervallo di mesi
     risultato = df_filtrato.groupby(['tipologia_professionista_sanitario', 'anno', 'intervallo_mesi'])[
         'conteggio'].sum().reset_index()
 
     return risultato
 
+
 def calcola_incremento(df,intervalli_anni_mesi):
+    """
+    Crea una tabella che ha come colonne 'tipologia_professionista_sanitario', 'intervallo_mesi', e 'anno',
+    e calcola l'incremento percentuale fra due anni successivi.
+
+
+        Args:
+            df: DataFrame contenente i dati raggruppati per anno e mese
+            intervalli_anni_mesi: Intervalli di anni e mesi per cui calcolare l'incremento
+        Returns:
+            risultato_con_incremento: DataFrame contenente l'incremento percentuale per ciascun intervallo
+
+        """
+
     # Crea una tabella pivot per avere anni come colonne
     df_pivot = df.pivot_table(index=['tipologia_professionista_sanitario', 'intervallo_mesi'], columns='anno',
                               values='conteggio').reset_index()
-
     def incremento_percentuale(row, anno1, anno2):
+        """
+        Calcola l'incremento percentuale del conteggio di professionisti sanitari tra due anni consecutivi.
+
+        """
         conteggio_anno1 = row.get(anno1, 0)
         conteggio_anno2 = row.get(anno2, 0)
+
+        # Calcolo dell'incremento percentuale
         return ((conteggio_anno2 - conteggio_anno1) / conteggio_anno1) * 100 if conteggio_anno1 > 0 else float('inf')
 
     risultati = []
+    # Itera su ciascuna coppia di 'anno' e 'intervallo mesi' presente in 'intervalli_anni_mesi'.
     for (anno1, anno2, intervallo) in intervalli_anni_mesi:
         df_intervallo = df_pivot[df_pivot['intervallo_mesi'] == intervallo]
+
+        # Itera su ciascuna riga del DataFrame filtrato.
         for _, row in df_intervallo.iterrows():
-            incremento = incremento_percentuale(row, anno1, anno2)
-            classificazione=classifica_incremento(incremento)
+            incremento = incremento_percentuale(row, anno1, anno2)  # Calcola l'incremento percentuale tra 'anno1' e 'anno2'
+            classificazione = classifica_incremento(incremento) # Classifica l'incremento in una delle categorie: alto, medio, basso, costante
+
+            # Aggiunge un dizionario con i risultati per la riga corrente nella lista 'risultati'.
             risultati.append({
                 'tipologia_professionista_sanitario': row['tipologia_professionista_sanitario'],
                 'anno': f"{anno1}-{anno2}",
@@ -93,7 +117,6 @@ def calcola_incremento(df,intervalli_anni_mesi):
                 'incremento_percentuale': incremento,
                 'incremento':classificazione
             })
-
     risultato_con_incremento = pd.DataFrame(risultati)
 
     return risultato_con_incremento
@@ -101,12 +124,13 @@ def calcola_incremento(df,intervalli_anni_mesi):
 
 def classifica_incremento(percentuale):
     """
-    Classifica l'incremento in base alla percentuale.
+    Classifica la percentuale dell'incremento in "alta", "media", "bassa" e "costante".
 
-    Args: percentuale (float): La percentuale di incremento da classificare.
+    Args:
+        percentuale (float): La percentuale di incremento da classificare.
 
     Returns:
-    str: La classificazione dell'incremento ('alta', 'media', 'costante', 'bassa').
+        str: La classificazione dell'incremento ('alta', 'media', 'costante', 'bassa').
     """
 
     if percentuale < 0:
@@ -119,17 +143,27 @@ def classifica_incremento(percentuale):
         return 'alta'
 
 
-
 def estendi_incremento(df):
+    """
+    Associa l'incremento associato a ciascun intervallo di mesi, assegnandolo a ogni mese individualmente.
+    Per fare questo, considera il dataFrame che contiene l'incremento percentuale per intervalli di mesi
+    e lo "estende": divide gli intervalli di mesi in mesi separati e associa l'incremento ad ognuno di essi.
+
+    Args:
+        df: dataframe
+    Returns:
+        df_esteso: dataframe in cui ad ogni mese è associato un valore di incremento
+    """
     # Crea un DataFrame vuoto per i dati estesi
     dati_estesi = []
 
     # Itera su ogni riga del DataFrame esistente
     for _, row in df.iterrows():
+        # Considera due anni consecutivi e prende solo il secondo (es. 2019-2020, prende 2020)
         anno_intervallo = row['anno'].split('-')
-        anno_fine = int(anno_intervallo[1])  # Prendi solo l'anno finale
+        anno_fine = int(anno_intervallo[1])
 
-        # Ottieni l'intervallo di mesi come lista
+        # Ottieni l'intervallo di mesi come lista (es. ['1', '2', '3', ...])
         mesi = row['intervallo_mesi'].split(', ')
 
         # Aggiungi una riga per ogni mese dell'intervallo
@@ -149,6 +183,7 @@ def estendi_incremento(df):
     df_esteso = df_esteso.sort_values(by=['tipologia_professionista_sanitario', 'year', 'month']).reset_index(drop=True)
 
     return df_esteso
+
 
 def unisci_incremento(df_originale, risultato_esteso):
     # Unisci il DataFrame originale con il risultato esteso, mantenendo tipologia, anno e mese
