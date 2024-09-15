@@ -1,5 +1,9 @@
 import pandas as pd
+import logging
 
+# Configuro il logger
+logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
+                    format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
 def corr_matrix_correlation_analisys(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -86,9 +90,9 @@ def unique_correlation_analisys(df: pd.DataFrame) -> pd.DataFrame:
         # Se entrambi i controlli sono veri per tutte le righe, puoi eliminare la colonna codice
         if codice_univoco.all() and descrizione_univoca.all():
             df = df.drop(columns=[pair[0]])
-            print(f"Feature {pair[0]} eliminata correlazione univoca con la feature {pair[1]}")
+            logging.info(f"Feature {pair[0]} eliminata correlazione univoca con la feature {pair[1]}")
         else:
-            print(f"Alcuni codici o descrizioni non sono univoci per le features {pair[0]} e {pair[1]}.")
+            logging.info(f"Alcuni codici o descrizioni non sono univoci per le features {pair[0]} e {pair[1]}.")
 
     return df
 
@@ -99,7 +103,7 @@ def remove_data_disdetta(df) -> pd.DataFrame:
     :param df:
     :return: df senza campioni con 'data_disdetta' non nullo.
     """
-    print("Eliminazione della feature: data_disdetta")
+    logging.info("Eliminazione della feature: data_disdetta")
     df.drop(columns=['data_disdetta'], inplace=True)
     return df
 
@@ -110,7 +114,7 @@ def remove_regione_erogazione(df: pd.DataFrame) -> pd.DataFrame:
     :param df:
     :return: df senza la colonna 'regione_erogazione'.
     """
-    print("Eliminazione della feature: regione_erogazione")
+    logging.info("Eliminazione della feature: regione_erogazione")
     df.drop(columns=['regione_erogazione'], inplace=True)
     return df
 
@@ -121,8 +125,7 @@ def remove_id_prenotazione(df: pd.DataFrame) -> pd.DataFrame:
     :param df:
     :return: df senza la colonna specificate.
     """
-    print("Eliminazione della feature: id_prenotazione")
-    print("Eliminazione della feature: id_prenotazione")
+    logging.info("Eliminazione della feature: id_prenotazione")
     df.drop(columns=['id_prenotazione'], inplace=True)
     return df
 
@@ -133,7 +136,7 @@ def remove_tipologia_servizio(df: pd.DataFrame) -> pd.DataFrame:
     :param df:
     :return: df senza la colonna 'tipologia_servizio'.
     """
-    print("Eliminazione della feature: tipologia_servizio")
+    logging.info("Eliminazione della feature: tipologia_servizio")
     df.drop(columns=['tipologia_servizio'], inplace=True)
     return df
 

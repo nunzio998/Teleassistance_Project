@@ -3,6 +3,12 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
+import logging
+
+# Configuro il logger
+logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
+                    format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
+
 
 def extract_durata_televisita(df):
     """
@@ -22,7 +28,7 @@ def extract_durata_televisita(df):
         """
         if pd.notnull(row['ora_inizio_erogazione']) and pd.notnull(row['ora_fine_erogazione']):
             durata = row['ora_fine_erogazione'] - row['ora_inizio_erogazione']
-            return int(durata.total_seconds()/60)
+            return int(durata.total_seconds() / 60)
         else:
             return None
 
@@ -52,6 +58,7 @@ def extract_eta_paziente(df):
 
     # Calcolare l'età in anni
     current_date = datetime.now()
+
     def calcola_eta(row):
         """
         Calcola l'età.
@@ -68,6 +75,7 @@ def extract_eta_paziente(df):
     df['eta_paziente'] = df.apply(calcola_eta, axis=1)
 
     return df
+
 
 def remove_data_nascita(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -94,8 +102,8 @@ def extract_year_and_month(df):
 
     return df
 
-def save_grouped_by_year_and_month(df, directory='month_dataset'):
 
+def save_grouped_by_year_and_month(df, directory='month_dataset'):
     """
     Raggruppa il DataFrame per anno e mese e salva ogni gruppo in un file Parquet separato
     nella directory 'month_dataset'.
@@ -105,7 +113,7 @@ def save_grouped_by_year_and_month(df, directory='month_dataset'):
     # Crea la directory se non esiste
     if not os.path.exists(directory):
         os.makedirs(directory)
-        print(f"Directory '{directory}' creata.")
+        logging.info(f"Directory '{directory}' creata.")
 
     # Raggruppa il DataFrame per anno e mese e salva ogni gruppo in un file Parquet separato
     for (year, month), group in df.groupby(['year', 'month']):
@@ -121,8 +129,8 @@ def save_grouped_by_year_and_month(df, directory='month_dataset'):
             df = pd.read_parquet(file_path)
     return df
 
-def conta_professionisti_per_mese(cartella):
 
+def conta_professionisti_per_mese(cartella):
     """
     Conta per ogni mese il numero di volte in cui compare ogni professionista sanitario.
     :param cartella (str): percorso della cartella contenente i file Parquet divisi per mese e anno.
@@ -130,6 +138,7 @@ def conta_professionisti_per_mese(cartella):
                           sanitario per ogni mese.
     """
     dati_aggregati = []
+
     def conta_occorrenze_professionisti(df, colonna='tipologia_professionista_sanitario'):
         """
         Conta il numero di occorrenze di ciascuna tipologia di professionista sanitario in un DataFrame.
@@ -168,6 +177,7 @@ def conta_professionisti_per_mese(cartella):
 
     return df_aggregato
 
+
 def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
     """
     Crea e salva il grafico a barre mensile per una specifica tipologia di professionista sanitario.
@@ -197,7 +207,7 @@ def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, t
         # Salva il grafico
         plt.savefig(output_path)
         plt.close()
-        print(f"Grafico mensile salvato in '{output_path}'.")
+        logging.info(f"Grafico mensile salvato in '{output_path}'.")
 
 
 def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
@@ -239,6 +249,7 @@ def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista
         # Salva l'istogramma
         plt.savefig(output_path)
         plt.close()
+
 
 def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
     """

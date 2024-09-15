@@ -5,6 +5,11 @@ import seaborn as sns
 from sklearn.metrics import silhouette_samples
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+import logging
+
+# Configuro il logger
+logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
+                    format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
 def compute_silhouette_score(df: pd.DataFrame):
     """
@@ -65,10 +70,10 @@ def compute_purity(df: pd.DataFrame, target_column: str):
     weighted_purity = sum(purity * len(df[df['Cluster'] == cluster]) for cluster, purity in cluster_purity.items())
     purity_score = weighted_purity / total_samples
 
-    print("Purezza di ciascun cluster:")
+    logging.info("Purezza di ciascun cluster:")
     for cluster, purity in cluster_purity.items():
-        print(f"Cluster {cluster}: Purezza = {purity:.2f}")
-    print(f"Purezza complessiva: {purity_score:.2f}\n")
+        logging.info(f"Cluster {cluster}: Purezza = {purity:.2f}")
+    logging.info(f"Purezza complessiva: {purity_score:.2f}\n")
 
     return cluster_purity, purity_score
 

@@ -1,4 +1,9 @@
 import pandas as pd
+import logging
+
+# Configuro il logger
+logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
+                    format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
 
 def data_cleaning(df) -> pd.DataFrame:
@@ -18,10 +23,10 @@ def data_cleaning(df) -> pd.DataFrame:
     df = remove_disdette(df)
 
     # Visualizzo le statistiche dei valori mancanti dopo l'imputazione
-    print("Statistiche valori mancanti dopo la rimozione dei campioni relativi a televisite disdette:\n")
+    logging.info("Statistiche valori mancanti dopo la rimozione dei campioni relativi a televisite disdette:")
     colonne_con_mancanti = df.columns[df.isnull().any()]
-    print(df[colonne_con_mancanti].isnull().sum())
-    print('-----------------------------------')
+    logging.info(df[colonne_con_mancanti].isnull().sum())
+    logging.info('-----------------------------------')
 
     # Identificazione e rimozione outliers dalle colonne specificate
     df = identify_and_remove_outliers(df, ['data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione',
@@ -60,28 +65,28 @@ def imputate_missing_values(df) -> pd.DataFrame:
     :return:
     """
     # Visualizzo le statistiche dei valori mancanti prima dell'imputazione
-    print("Statistiche valori mancanti prima dell'imputazione:\n")
+    logging.info("Statistiche valori mancanti dopo la rimozione dei campioni relativi a televisite disdette:")
     colonne_con_mancanti = df.columns[df.isnull().any()]
-    print(df[colonne_con_mancanti].isnull().sum())
-    print('-----------------------------------')
+    logging.info(df[colonne_con_mancanti].isnull().sum())
+    logging.info('-----------------------------------')
 
     # Imputazione dei valori mancanti relativi a comune_residenza
-    df = imputate_comune_residenza(df) # Valori mancanti relativi al comune di 'None' in provincia di Torino.
+    df = imputate_comune_residenza(df)  # Valori mancanti relativi al comune di 'None' in provincia di Torino.
 
     # Imputazione dei valori mancanti relativi a codice_provincia_residenza
-    df = imputate_codice_provincia_residenza(df) # Valori mancanti relativi al codice della provincia di Napoli, 'NA'.
+    df = imputate_codice_provincia_residenza(df)  # Valori mancanti relativi al codice della provincia di Napoli, 'NA'.
 
     # Imputazione dei valori mancanti relativi a codice_provincia_erogazione
-    df = imputate_codice_provincia_erogazione(df) # Valori mancanti relativi al codice della provincia di Napoli, 'NA'.
+    df = imputate_codice_provincia_erogazione(df)  # Valori mancanti relativi al codice della provincia di Napoli, 'NA'.
 
     # Imputazione dei valori mancanti relativi a ora_inizio_erogazione e ora_fine_erogazione
     df = imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df)
 
     # Visualizzo le statistiche dei valori mancanti dopo l'imputazione
-    print("Statistiche valori mancanti dopo l'imputazione:\n")
+    logging.info("Statistiche valori mancanti dopo la rimozione dei campioni relativi a televisite disdette:")
     colonne_con_mancanti = df.columns[df.isnull().any()]
-    print(df[colonne_con_mancanti].isnull().sum())
-    print('-----------------------------------')
+    logging.info(df[colonne_con_mancanti].isnull().sum())
+    logging.info('-----------------------------------')
 
     return df
 
@@ -139,9 +144,9 @@ def smooth_noisy_data(df, columns, window_size=3):
                     print(f"Colonna {column} non può essere convertita in datetime.")
 
             except Exception as e:
-                print(f"Errore nella conversione della colonna {column} in datetime: {e}")
+                logging.error(f"Errore nella conversione della colonna {column} in datetime: {e}")
         else:
-            print(f"La colonna {column} non è di tipo numerico o datetime, quindi non sarà trattata.")
+            logging.info(f"La colonna {column} non è di tipo numerico o datetime, quindi non sarà trattata.")
 
     return df
 
@@ -329,8 +334,7 @@ def check_missing_values_same_row(df):
     missing_both = df['ora_inizio_erogazione'].isna() & df['ora_fine_erogazione'].isna()
     rows_with_both_missing = df[missing_both]
     num_rows_with_both_missing = len(rows_with_both_missing)
-    print(f"Numero di righe con 'ora_inizio_erogazione' e 'ora_fine_erogazione' mancanti: {num_rows_with_both_missing}")
-
+    logging.info(f"Numero di righe con 'ora_inizio_erogazione' e 'ora_fine_erogazione' mancanti: {num_rows_with_both_missing}")
 
 def check_missing_values_start(df):
     """
@@ -341,7 +345,7 @@ def check_missing_values_start(df):
     missing_start = df['ora_inizio_erogazione'].isna()
     rows_with_start_missing = df[missing_start]
     num_rows_with_start_missing = len(rows_with_start_missing)
-    print(f"Numero di righe con 'ora_inizio_erogazione' mancante: {num_rows_with_start_missing}")
+    logging.info(f"Numero di righe con 'ora_inizio_erogazione' mancante: {num_rows_with_start_missing}")
 
 
 def check_missing_values_end(df):
@@ -353,7 +357,7 @@ def check_missing_values_end(df):
     missing_end = df['ora_fine_erogazione'].isna()
     rows_with_end_missing = df[missing_end]
     num_rows_with_end_missing = len(rows_with_end_missing)
-    print(f"Numero di righe con 'ora_fine_erogazione' mancante: {num_rows_with_end_missing}")
+    logging.info(f"Numero di righe con 'ora_fine_erogazione' mancante: {num_rows_with_end_missing}")
 
 
 def ordina_date(df):

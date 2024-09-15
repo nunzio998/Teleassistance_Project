@@ -1,6 +1,11 @@
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
+import logging
+
+# Configuro il logger
+logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
+                    format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
 def analyze_clustering(df, numerical_features, categorical_features,reverse_mapping):
     """
@@ -12,11 +17,11 @@ def analyze_clustering(df, numerical_features, categorical_features,reverse_mapp
     :return: None
     """
     # Generazione di grafici per caratteristiche numeriche
-    print("Generazione di grafici per caratteristiche numeriche...")
+    logging.info("Generazione di grafici per caratteristiche numeriche...")
     plot_numerical_features(df, numerical_features)
 
     # Generazione di grafici per caratteristiche categoriali
-    print("Generazione di grafici per caratteristiche categoriali...")
+    logging.info("Generazione di grafici per caratteristiche categoriali...")
     plot_categorical_features(df, categorical_features,reverse_mapping)
 
     return

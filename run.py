@@ -4,6 +4,12 @@ from data_prep.features_selection import feature_selection
 from feature_extraction.features_extraction import feature_extraction
 from feature_extraction.extract_increment import incremento
 from clustering.clustering_execution import execute_clustering
+from data_transformation.data_transformation import data_transformation
+import logging
+
+# Configuro il logger
+logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
+                    format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
 # Configura pandas per visualizzare un DataFrame senza limiti di spazio
 pd.set_option('display.max_rows', None)  # Nessun limite sul numero di righe
@@ -36,7 +42,7 @@ df_clustered, cluster_labels, svd_transformed_data = execute_clustering(df, labe
 
 # # Visualizzazione del numero di righe e colonne del dataset
 # num_rows, num_columns = df.shape
-# print(f" Dopo il clustering, il DataFrame ha {num_rows} righe e {num_columns} colonne.")
+# logging.info(f" Dopo il clustering, il DataFrame ha {num_rows} righe e {num_columns} colonne.")
 
 
 
