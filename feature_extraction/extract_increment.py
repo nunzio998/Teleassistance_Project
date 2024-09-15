@@ -3,13 +3,10 @@ import pandas as pd
 def dati_da_utilizzare(df):
     """
     Definisce i dati da utilizzare per calcolare l'incremento
-
-    Args:
-            df: DataFrame contenente i dati iniziali
-    Returns:
-            tipologie: lista delle tipologie di professionista sanitario
-            DaF: DataFrame che contiene il numero di occorrenze di ogni professionista sanitario per mese
-            intervalli_anni_mesi: lista di tuple che definiscono intervalli di anni e mesi in formato semestrale
+    :param df: DataFrame contenente i dati iniziali
+    :return tipologie: lista delle tipologie di professionista sanitario
+    :return DaF: DataFrame che contiene il numero di occorrenze di ogni professionista sanitario per mese
+    :return intervalli_anni_mesi: lista di tuple che definiscono intervalli di anni e mesi in formato semestrale
         """
 
     tipologie = df['tipologia_professionista_sanitario'].unique()  # Estrae le tipologie uniche di professionista
@@ -30,11 +27,8 @@ def dati_da_utilizzare(df):
 def get_intervallo_mesi(mese):
     """
     Restituisce l'intervallo di mesi a cui appartiene il mese specificato.
-
-    Args:
-           mese: Mese per il quale si desidera ottenere l'intervallo
-    Returns:
-           intervallo: Intervallo di mesi in cui il mese rientra
+    :param mese: Mese per il quale si desidera ottenere l'intervallo
+    :return intervallo: Intervallo di mesi in cui il mese rientra
        """
     intervalli_mesi = {
             (1, 2, 3, 4, 5, 6): '1, 2, 3, 4, 5, 6',
@@ -50,13 +44,9 @@ def somma_per_intervallo_mesi(df, tipologie):
        Calcola la somma delle occorrenze di ogni professionista sanitario per l'intervallo di
        mesi specificato (semestre). I risultati vengono raggruppati in un dataframe che ha come colonne
        'tipologia_professionista_sanitario', 'anno', 'intervallo_mesi' e 'conteggio'.
-
-       Args:
-           df: DataFrame contenente i dati
-           tipologie: Lista di tipologie di professionisti sanitari
-
-       Returns:
-           risultato: DataFrame con la somma delle occorrenze per tipologia, anno e intervallo di mesi
+       :param df: DataFrame contenente i dati
+       :param tipologie: Lista di tipologie di professionisti sanitari
+       :return risultato: DataFrame con la somma delle occorrenze per tipologia, anno e intervallo di mesi
        """
 
     df['intervallo_mesi'] = df['mese'].apply(get_intervallo_mesi)  # Aggiungo la colonna 'intervallo_mesi'
@@ -75,15 +65,10 @@ def calcola_incremento(df,intervalli_anni_mesi):
     """
     Crea una tabella che ha come colonne 'tipologia_professionista_sanitario', 'intervallo_mesi', e 'anno',
     e calcola l'incremento percentuale fra due anni successivi.
-
-
-        Args:
-            df: DataFrame contenente i dati raggruppati per anno e mese
-            intervalli_anni_mesi: Intervalli di anni e mesi per cui calcolare l'incremento
-        Returns:
-            risultato_con_incremento: DataFrame contenente l'incremento percentuale per ciascun intervallo
-
-        """
+    :param df: dataFrame contenente i dati raggruppati per anno e mese
+    :param intervalli_anni_mesi: Intervalli di anni e mesi per cui calcolare l'incremento
+    :return risultato_con_incremento: dataFrame contenente l'incremento percentuale per ciascun intervallo
+    """
 
     # Crea una tabella pivot per avere anni come colonne
     df_pivot = df.pivot_table(index=['tipologia_professionista_sanitario', 'intervallo_mesi'], columns='anno',
@@ -125,12 +110,8 @@ def calcola_incremento(df,intervalli_anni_mesi):
 def classifica_incremento(percentuale):
     """
     Classifica la percentuale dell'incremento in "alta", "media", "bassa" e "costante".
-
-    Args:
-        percentuale (float): La percentuale di incremento da classificare.
-
-    Returns:
-        str: La classificazione dell'incremento ('alta', 'media', 'costante', 'bassa').
+    :param percentuale (float): La percentuale di incremento da classificare.
+    :return str: La classificazione dell'incremento ('alta', 'media', 'costante', 'bassa').
     """
 
     if percentuale < 0:
@@ -148,11 +129,8 @@ def estendi_incremento(df):
     Associa l'incremento associato a ciascun intervallo di mesi, assegnandolo a ogni mese individualmente.
     Per fare questo, considera il dataFrame che contiene l'incremento percentuale per intervalli di mesi
     e lo "estende": divide gli intervalli di mesi in mesi separati e associa l'incremento ad ognuno di essi.
-
-    Args:
-        df: dataframe
-    Returns:
-        df_esteso: dataframe in cui ad ogni mese è associato un valore di incremento
+    :param df: dataframe
+    :return df_esteso: dataframe in cui ad ogni mese è associato un valore di incremento
     """
     # Crea un DataFrame vuoto per i dati estesi
     dati_estesi = []
@@ -190,13 +168,9 @@ def unisci_incremento(df_originale, risultato_esteso):
     Unisce il DataFrame originale con il DataFrame esteso (risultato_esteso) basandosi sulle colonne
     'tipologia_professionista_sanitario', 'year', e 'month'.In questo modo, l'incremento calcolato per
      ogni combinazione di tipologia, anno e mese verrà aggiunto al DataFrame originale.
-
-      Args:
-        df_originale: dataFrame iniziale
-        risultato_esteso: dataFrame con incremento associato ad ogni mese
-
-    Returns:
-        df_unito: dataFrame in cui ogni campione ha associata una feature incremento
+    :param df_originale: dataFrame iniziale
+    :paramrisultato_esteso: dataFrame con incremento associato ad ogni mese
+    :retur df_unito: dataFrame in cui ogni campione ha associata una feature incremento
     """
 
     # Unisci il DataFrame originale con il risultato esteso, mantenendo tipologia, anno e mese
@@ -215,13 +189,9 @@ def incremento(df):
     Funzione principale che calcola la variabile di incremento, estende i risultati per ciascun mese
     e li unisce al DataFrame originale. Alla fine elimina i dati relativi all'anno 2019,
     poiché l'incremento si applica solo a partire dal 2020.
-
-    Args:
-        df: DataFrame contenente i dati originali.
-
-    Returns:
-        df_finale: DataFrame finale con la variabile 'incremento' calcolata e unita ai dati originali.
-        """
+    :param df: DataFrame contenente i dati originali.
+    :return df_finale: DataFrame finale con la variabile 'incremento' calcolata e unita ai dati originali.
+    """
 
     # Definisco i dati da utilizzare
     tipologie, DaF, intervalli_anni_mese = dati_da_utilizzare(df)

@@ -13,6 +13,7 @@ def extract_durata_televisita(df):
     # Assicurarsi che 'ora_inizio_erogazione' e 'ora_fine_erogazione' siano in formato datetime
     df['ora_inizio_erogazione'] = pd.to_datetime(df['ora_inizio_erogazione'], errors='coerce')
     df['ora_fine_erogazione'] = pd.to_datetime(df['ora_fine_erogazione'], errors='coerce')
+
     def calcola_durata(row):
         """
         Calcola la durata della televisita in secondi tra 'ora_inizio_erogazione' e 'ora_fine_erogazione'.
@@ -281,7 +282,6 @@ def feature_extraction(df):
     :param df: dataFrame
     :return df: dataFrame
     """
-
     # Calcola l'età del paziente e rimuove la colonna 'data_nascita'
     df = extract_eta_paziente(df)
     df = remove_data_nascita(df)

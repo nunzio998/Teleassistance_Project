@@ -26,19 +26,27 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop(columns=[col for col in features_to_drop if col in df.columns])
 
 def define_features_types() -> (list, list):
+    """
+    Definisce le feature numeriche e categoriche da utilizzare nel clustering.
+    :return categorical_features, numerical_features
+    """
     categorical_features = ['sesso', 'regione_residenza', 'regione_erogazione','tipologia_professionista_sanitario', 'incremento', 'tipologia_struttura_erogazione']
     numerical_features = ['eta_paziente', 'month', 'year']
     return categorical_features, numerical_features
 
 def plot_elbow_method(data, max_clusters=10):
-
+    """
+    Visualizza l'elbow method per la ricerca del numero ottimale di cluster.
+    :param data: dati del clustering
+    :param max_clusters: numero massimo di cluster da esplorare
+    :return: None
+    """
     inertia = []  # Lista per memorizzare l'inertia (somma delle distanze al quadrato dai centroidi)
 
     for n_clusters in range(1, max_clusters + 1):
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         kmeans.fit(data)
         inertia.append(kmeans.inertia_)  # Aggiungi l'inertia per il numero corrente di cluster
-
 
     # Plot dell'Elbow Method
     plt.figure(figsize=(8, 6))
@@ -51,8 +59,6 @@ def plot_elbow_method(data, max_clusters=10):
     plt.savefig('graphs/elbow_method.png')
     plt.close()
 
-    # Ritorna i valori dell'inertia per ulteriori analisi
-    return inertia
 
 def transform_and_preprocess_data(df: pd.DataFrame, categorical_features: list, numerical_features: list):
     label_encoders = {}
@@ -100,7 +106,7 @@ def apply_clustering(data, n_clusters=4, n_components=None):
 def execute_clustering(df: pd.DataFrame, n_clusters=4):
     """
     Metodo che esegue tutti i metodi del file clustering_execution
-    :param df:
+    :param df: dataFrame
     :return: df
     """
     print("Eseguo il clustering...")
@@ -108,28 +114,23 @@ def execute_clustering(df: pd.DataFrame, n_clusters=4):
 
     categorical_features, numerical_features = define_features_types()
 
-    # Ora otteniamo anche reverse_mapping
+    # Otteniamo il reverse_mapping delle feature categoriche
     df_processed, label_encoders, reverse_mapping = transform_and_preprocess_data(df_cleaned, categorical_features, numerical_features)
 
     # Calcolo del numero ottimale di cluster
-    print("Calcolo del numero ottimale di cluster...")
     plot_elbow_method(df_processed, max_clusters=10)
 
     # Applicazione del clustering
-    print("Applicazione del clustering con KMeans...")
     labels, svd_data = apply_clustering(df_processed, n_clusters=n_clusters)
 
     # Aggiungiamo le etichette e le componenti principali al dataframe originale
     df_cleaned['Cluster'] = labels
 
-    # Analisi del clustering, con la possibilità di usare reverse_mapping nei grafici
+    # Generazione dei plot per analizzare il clustering
     analyze_clustering(df_cleaned, numerical_features, categorical_features, reverse_mapping)
 
-    # Calcolo delle metriche e generazione dei plot, passando anche label_encoders e reverse_mapping
-    print("Sto calcolando le metriche...")
+    # Calcolo delle metriche
     compute_all_metrics(df_cleaned, target_column='incremento', label_encoders=label_encoders)
-
-
 
     return df_cleaned, labels, svd_data
 

@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 def remove_columns_with_unique_correlation(df: pd.DataFrame) -> pd.DataFrame:
     """
     Rimuove le colonne con correlazione univoca

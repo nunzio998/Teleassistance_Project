@@ -5,13 +5,9 @@ import seaborn as sns
 def plot_numerical_features(df, numerical_features):
     """
        Crea boxplot per ogni feature numerica specificata e li salva in una cartella chiamata 'graphs'.
-
-       Args:
-           df: DataFrame contenente i dati di clustering.
-           numerical_features: Lista di feature numeriche che si desidera visualizzare.
-
-       Returns:
-           None: I grafici vengono salvati come file PNG.
+        :param df: DataFrame contenente i dati di clustering.
+        :param numerical_features: Lista di feature numeriche che si desidera visualizzare.
+        :return None
        """
     for feature in numerical_features:
         plt.figure(figsize=(10, 6))
@@ -26,7 +22,7 @@ def plot_categorical_features(df, categorical_features, reverse_mapping):
     Crea un grafico countplot per le feature categoriche e utilizza il reverse_mapping per associare i numeri alle categorie originali.
     :param df: DataFrame con i dati
     :param categorical_features: Lista delle feature categoriche
-    :param reverse_mapping: Dizionario che mappa i numeri alle categorie originali
+    :param reverse_mapping: dizionario che mappa la feature al loro valore codificato
     """
     # Creare la cartella 'graphs' se non esiste
     os.makedirs('graphs', exist_ok=True)
@@ -34,7 +30,6 @@ def plot_categorical_features(df, categorical_features, reverse_mapping):
     for feature in categorical_features:
         plt.figure(figsize=(12, 7))
         sns.countplot(x='Cluster', hue=feature, data=df, palette='Set2')
-
         plt.title(f'Distribuzione di {feature} per Cluster', fontsize=16)
         plt.xlabel('Cluster', fontsize=14)
         plt.ylabel('Count', fontsize=14)
@@ -68,7 +63,14 @@ def plot_categorical_features(df, categorical_features, reverse_mapping):
 
 
 def analyze_clustering(df, numerical_features, categorical_features,reverse_mapping):
-
+    """
+    Genera grafici per analizzare la distribuzione delle feature nei cluster.
+    :param df: dataFrame
+    :param numerical_features: feature numeriche
+    :param categorical_features: feature categoriche
+    :param reverse_mapping: dizionario che mappa la feature al loro valore codificato
+    :return: None
+    """
     # Generazione di grafici per caratteristiche numeriche
     print("Generazione di grafici per caratteristiche numeriche...")
     plot_numerical_features(df, numerical_features)
@@ -78,6 +80,8 @@ def analyze_clustering(df, numerical_features, categorical_features,reverse_mapp
     plot_categorical_features(df, categorical_features,reverse_mapping)
 
     return
+
+
 
 
 """

@@ -101,7 +101,6 @@ def compute_final_metric(purity_score: float, silhouette_score: float, num_clust
     """
     Calcola la metrica finale, come la media delle due metriche normalizzate
     e sottraendo un termine di penalità pari a 0,05 volte il numero di cluster.
-
     :param purity_score: La purezza normalizzata.
     :param silhouette_score: Il punteggio di silhouette normalizzato.
     :param num_clusters: Numero di cluster utilizzati nel clustering.
@@ -124,6 +123,7 @@ def plot_increment_distribution(df: pd.DataFrame, label_encoders: dict):
     """
     Crea un grafico a barre impilate per la distribuzione della variabile 'incremento' per ciascun cluster.
     :param df: DataFrame contenente i dati con le colonne 'Cluster' e 'incremento'.
+    :param label_encoders:
     """
     if 'incremento' in label_encoders:
         le_incremento = label_encoders['incremento']
@@ -133,6 +133,7 @@ def plot_increment_distribution(df: pd.DataFrame, label_encoders: dict):
     if not os.path.exists('graphs'):
         os.makedirs('graphs')
 
+    # Plotta la distribuzione dell'incremento
     plt.figure(figsize=(12, 6))
     sns.countplot(data=df, x='Cluster', hue='incremento')
     plt.title('Distribuzione della variabile target Incremento per Cluster')
@@ -144,27 +145,7 @@ def plot_increment_distribution(df: pd.DataFrame, label_encoders: dict):
     plt.savefig('graphs/plot_increment_distribution.png')
     plt.close()
 
-def plot_pca_components(pca_data, labels):
-    """
-    Crea un grafico delle prime due componenti principali per visualizzare la distribuzione dei cluster.
-    :param pca_data: I dati ridotti dimensionalmente con PCA.
-    :param labels: Etichette dei cluster.
-    """
-    if not os.path.exists('graphs'):
-        os.makedirs('graphs')
-
-    plt.figure(figsize=(10, 6))
-    plt.scatter(pca_data[:, 0], pca_data[:, 1], c=labels, cmap='viridis', marker='o')
-    plt.title('Distribuzione delle Componenti PCA per Cluster')
-    plt.xlabel('PCA Component 1')
-    plt.ylabel('PCA Component 2')
-    plt.colorbar(label='Cluster')
-
-    # Salva il grafico
-    plt.savefig('graphs/pca_cluster_distribution.png')
-    plt.close()
-
-def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='incremento', pca_data=None):
+def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='incremento'):
     """
      Calcola tutte le metriche e genera i grafici per il clustering.
      :param df: DataFrame contenente i dati, inclusi i cluster.
@@ -176,21 +157,16 @@ def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='increme
     # Plotto la distribuzione dell'incremento rispetto ad ogni cluster
     plot_increment_distribution(df, label_encoders)
 
-    # calcolo la purezza di ogni cluster e la purezza media del clustering
-    print("\nCalcolo della purezza di ciascun cluster e della purezza complessiva:")
+    # Calcolo la purezza di ogni cluster e la purezza media del clustering
     cluster_purity, purity_score = compute_purity(df, target_column)
 
-    print("\nCalcolo dell'indice di Silhouette... Attendi...")
+    # Calcolo dell'indice di Silhouette
     #silhouette_score = compute_silhouette_score(df)
 
     # Plot della purezza dei cluster
     plot_purity_bars(cluster_purity, purity_score)
 
-    # Visualizzazione delle componenti PCA se disponibili
-    if pca_data is not None:
-        plot_pca_components(pca_data, df['Cluster'])
-
-    print("\nCalcolo la metrica finale...")
+    # Calcolo della metrica finale
     #final_metric = compute_final_metric(purity_score,silhouette_score, num_clusters=len(df['Cluster'].unique()))
     #print(f"\nLa metrica finale è : {final_metric:.2f}")
 
