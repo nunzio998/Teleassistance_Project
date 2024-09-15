@@ -2,6 +2,7 @@ import pandas as pd
 from data_prep.data_cleaning import data_cleaning
 from data_prep.features_selection import feature_selection_execution
 from feature_extraction.features_extraction import feature_extraction
+from data_transformation.data_transformation import data_transformation
 from feature_extraction.extract_increment import incremento
 from clustering.clustering_execution import execute_clustering
 
@@ -21,8 +22,12 @@ df = feature_extraction(df)
 # STEP 4: Calcolo dell'incremento
 df = incremento(df)
 
+# STEP 5: Data Transformation
+df, label_encoders, reverse_mapping, numerical_features, categorical_features = data_transformation(df)
+
 # STEP 5: Clustering Execution
-df_clustered, cluster_labels, svd_transformed_data = execute_clustering(df , n_clusters=4)
+df_clustered, cluster_labels, svd_transformed_data = execute_clustering(df, label_encoders, numerical_features,
+                                                                        categorical_features, reverse_mapping)
 
 
 

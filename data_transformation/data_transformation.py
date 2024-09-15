@@ -1,44 +1,6 @@
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import StandardScaler
-
-
-def normalize_min_max(df, columns):
-    """
-    Normalizza le colonne specificate del DataFrame usando la normalizzazione min-max.
-    :param df: DataFrame
-    :param columns: Lista delle colonne da normalizzare
-    :return: DataFrame con colonne normalizzate
-    """
-    scaler = MinMaxScaler()
-    df[columns] = scaler.fit_transform(df[columns])
-    return df
-
-
-def standardize(df, columns):
-    """
-    Standardizza le colonne specificate del DataFrame usando lo Z-score.
-    :param df: DataFrame
-    :param columns: Lista delle colonne da standardizzare
-    :return: DataFrame con colonne standardizzate
-    """
-    scaler = StandardScaler()
-    df[columns] = scaler.fit_transform(df[columns])
-    return df
-
-
-def aggregate_data(df, group_by_columns, agg_columns, agg_funcs):
-    """
-    Esegue l'aggregazione dei dati.
-    :param df: DataFrame
-    :param group_by_columns: Lista delle colonne su cui raggruppare i dati
-    :param agg_columns: Lista delle colonne da aggregare
-    :param agg_funcs: Dizionario delle funzioni di aggregazione
-    :return: DataFrame aggregato
-    """
-    agg_dict = {col: agg_funcs for col in agg_columns}
-    df_agg = df.groupby(group_by_columns).agg(agg_dict).reset_index()
-    return df_agg  # ritorno il dataset aggregato
-
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+import numpy as np
+import pandas as pd
 
 def data_transformation(df):
     """
@@ -46,14 +8,89 @@ def data_transformation(df):
     :param df: DataFrame da trasformare
     :return: DataFrame trasformato
     """
-    # Normalizzazione
-    columns_to_normalize = ['colonna_da_normalizzare']
-    df = normalize_min_max(df, columns_to_normalize)
 
-    # Aggregazione
-    group_by_columns = ['regione_residenza', 'tipologia_servizio', 'tipologia_struttura_erogazione', 'tipologia_professionista_sanitario']
-    agg_columns = ['some_numeric_column1', 'some_numeric_column2']
-    agg_funcs = ['mean', 'sum']
-    df = aggregate_data(df, group_by_columns, agg_columns, agg_funcs)
+    # Elimina le feature poco significative
+    df = remove_features(df)
+
+    # Definisce quali sono le feature numeriche e quelle categoriche
+    categorical_features, numerical_features = define_features_types()
+
+    # Applica la standardizzazione delle feature numeriche
+    df = standardize_numerical_features(df, numerical_features)
+
+    # Applica la trasformazione (encoding) delle feature categoriche
+    df, label_encoders, reverse_mapping = transform_and_preprocess_data(df, categorical_features)
+
+    return df, label_encoders, reverse_mapping, numerical_features, categorical_features
+
+def remove_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rimuove le feature poco significative dal DataFrame.
+    :param df:
+    :return: df senza le colonne specificate.
+    """
+    features_to_drop = [
+        'id_prenotazione', 'id_paziente', 'asl_residenza', 'comune_residenza', 'descrizione_attivita',
+        'asl_erogazione', 'codice_struttura_erogazione', 'provincia_residenza', 'provincia_erogazione',
+        'struttura_erogazione', 'id_professionista_sanitario'
+    ]
+    return df.drop(columns=[col for col in features_to_drop if col in df.columns])
+
+def define_features_types() -> (list, list):
+    """
+    Definisce le feature numeriche e categoriche da utilizzare nel clustering.
+    :return categorical_features, numerical_features
+    """
+    categorical_features = ['sesso', 'regione_residenza', 'regione_erogazione','tipologia_professionista_sanitario', 'incremento', 'tipologia_struttura_erogazione']
+    numerical_features = ['eta_paziente', 'month', 'year']
+    return categorical_features, numerical_features
+
+
+def transform_and_preprocess_data(df: pd.DataFrame, categorical_features: list):
+    """
+    Effettua l'encoding delle feature categoriche con metodo LabelEncoder, e crea un dizionario
+    che mappa l'encoding delle feature ad ogni feature.
+    :param df: dataFrame
+    :param categorical_features: colonne delle feature categoriche
+    :return: df, label_encoders, reverse_mapping
+    """
+    label_encoders = {}
+    reverse_mapping = {}
+
+    # Gestione delle colonne temporali (converte in timestamp con utc=True)
+    for col in ['data_contatto', 'data_erogazione']:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors='coerce', utc=True)
+            df[col] = df[col].astype('int64') // 10 ** 9  # Convert to UNIX timestamp safely
+
+    # Applica LabelEncoder a ciascuna colonna categorica
+    for col in categorical_features:
+        if col in df.columns and (df[col].dtype == 'object' or isinstance(df[col].dtype, pd.StringDtype)):
+            le = LabelEncoder()
+            df[col] = le.fit_transform(df[col])
+            label_encoders[col] = le
+            # Aggiungi la mappatura inversa per ogni feature categorica
+            reverse_mapping[col] = {i: label for i, label in enumerate(le.classes_)}
+
+    # Verifica che tutte le colonne siano numeriche dopo l'encoding
+    if not all(np.issubdtype(df[col].dtype, np.number) for col in df.columns):
+        raise ValueError("Ci sono ancora colonne non numeriche nel DataFrame dopo l'encoding.")
+
+    return df, label_encoders, reverse_mapping
+
+
+def standardize_numerical_features(df, numerical_features):
+    """
+    Standardizza le feature numeriche.
+    :param df: dataFrame
+    :param numerical_features: colonne delle feature numeriche
+    :return df: dataFrame con feature standardizzate
+    """
+    # Crea un'istanza dello StandardScaler
+    scaler = StandardScaler()
+
+    # Applica la standardizzazione solo alle colonne specificate
+    df[numerical_features] = scaler.fit_transform(df[numerical_features])
 
     return df
+

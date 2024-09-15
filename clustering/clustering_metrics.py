@@ -72,6 +72,7 @@ def compute_purity(df: pd.DataFrame, target_column: str):
 
     return cluster_purity, purity_score
 
+
 def plot_purity_bars(cluster_purity, overall_purity):
     """
     Crea un grafico a barre per visualizzare la purezza di ciascun cluster e la purezza complessiva.
@@ -96,6 +97,7 @@ def plot_purity_bars(cluster_purity, overall_purity):
     # Salva il grafico
     plt.savefig('graphs/cluster_purity.png')
     plt.close()
+
 
 def compute_final_metric(purity_score: float, silhouette_score: float, num_clusters: int) -> float:
     """
@@ -123,7 +125,8 @@ def plot_increment_distribution(df: pd.DataFrame, label_encoders: dict):
     """
     Crea un grafico a barre impilate per la distribuzione della variabile 'incremento' per ciascun cluster.
     :param df: DataFrame contenente i dati con le colonne 'Cluster' e 'incremento'.
-    :param label_encoders:
+    :param label_encoders (dict): dizionario che associa il nome di ciascuna colonna categorica al rispettivo
+                                  oggetto LabelEncoder.
     """
     if 'incremento' in label_encoders:
         le_incremento = label_encoders['incremento']

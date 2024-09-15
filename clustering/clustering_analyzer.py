@@ -2,6 +2,25 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+def analyze_clustering(df, numerical_features, categorical_features,reverse_mapping):
+    """
+    Genera grafici per analizzare la distribuzione delle feature nei cluster.
+    :param df: dataFrame
+    :param numerical_features: feature numeriche
+    :param categorical_features: feature categoriche
+    :param reverse_mapping: dizionario che mappa la feature al loro valore codificato
+    :return: None
+    """
+    # Generazione di grafici per caratteristiche numeriche
+    print("Generazione di grafici per caratteristiche numeriche...")
+    plot_numerical_features(df, numerical_features)
+
+    # Generazione di grafici per caratteristiche categoriali
+    print("Generazione di grafici per caratteristiche categoriali...")
+    plot_categorical_features(df, categorical_features,reverse_mapping)
+
+    return
+
 def plot_numerical_features(df, numerical_features):
     """
        Crea boxplot per ogni feature numerica specificata e li salva in una cartella chiamata 'graphs'.
@@ -62,24 +81,6 @@ def plot_categorical_features(df, categorical_features, reverse_mapping):
         plt.close()
 
 
-def analyze_clustering(df, numerical_features, categorical_features,reverse_mapping):
-    """
-    Genera grafici per analizzare la distribuzione delle feature nei cluster.
-    :param df: dataFrame
-    :param numerical_features: feature numeriche
-    :param categorical_features: feature categoriche
-    :param reverse_mapping: dizionario che mappa la feature al loro valore codificato
-    :return: None
-    """
-    # Generazione di grafici per caratteristiche numeriche
-    print("Generazione di grafici per caratteristiche numeriche...")
-    plot_numerical_features(df, numerical_features)
-
-    # Generazione di grafici per caratteristiche categoriali
-    print("Generazione di grafici per caratteristiche categoriali...")
-    plot_categorical_features(df, categorical_features,reverse_mapping)
-
-    return
 
 
 
@@ -88,5 +89,4 @@ def analyze_clustering(df, numerical_features, categorical_features,reverse_mapp
 Considerazioni:
 1. Durata televisita infermiere: se è inferiore a un tot, vuol dire che non aveva bisogno di infermiere
  e lo ha reindirizzato?
-
 """
