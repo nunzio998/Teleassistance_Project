@@ -17,19 +17,25 @@ def data_cleaning(df) -> pd.DataFrame:
     # Rimozione dei campioni con 'data_disdetta' non nullo
     df = remove_disdette(df)
 
+    # Visualizzo le statistiche dei valori mancanti dopo l'imputazione
+    print("Statistiche valori mancanti dopo la rimozione dei campioni relativi a televisite disdette:\n")
+    colonne_con_mancanti = df.columns[df.isnull().any()]
+    print(df[colonne_con_mancanti].isnull().sum())
+    print('-----------------------------------')
+
     # Identificazione e rimozione outliers dalle colonne specificate
-    df = identify_and_remove_outliers(df, ['data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione', 'ora_fine_erogazione'])
+    df = identify_and_remove_outliers(df, ['data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione',
+                                           'ora_fine_erogazione'])
 
     # Gestione dei dati rumorosi nella colonna specificata
-    df = smooth_noisy_data(df, ['data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione', 'ora_fine_erogazione'])
+    df = smooth_noisy_data(df, ['data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione',
+                                'ora_fine_erogazione'])
 
     # Rimozione dei duplicati
     df = remove_duplicati(df)
 
-    #Ordina le date di erogazione del servizio
+    # Ordina le date di erogazione del servizio
     df = ordina_date(df)
-
-    # TODO: stabilire a quali features applicare 'identify_and_remove_outliers' e 'smooth_noisy_data'.
 
     return df
 
@@ -60,7 +66,13 @@ def imputate_missing_values(df) -> pd.DataFrame:
     print('-----------------------------------')
 
     # Imputazione dei valori mancanti relativi a comune_residenza
-    df = imputate_comune_residenza(df)
+    df = imputate_comune_residenza(df) # Valori mancanti relativi al comune di 'None' in provincia di Torino.
+
+    # Imputazione dei valori mancanti relativi a codice_provincia_residenza
+    df = imputate_codice_provincia_residenza(df) # Valori mancanti relativi al codice della provincia di Napoli, 'NA'.
+
+    # Imputazione dei valori mancanti relativi a codice_provincia_erogazione
+    df = imputate_codice_provincia_erogazione(df) # Valori mancanti relativi al codice della provincia di Napoli, 'NA'.
 
     # Imputazione dei valori mancanti relativi a ora_inizio_erogazione e ora_fine_erogazione
     df = imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df)
@@ -143,7 +155,7 @@ def identify_and_remove_outliers(df, columns, original_format='%Y-%m-%dT%H:%M:%S
     :return: Un DataFrame senza outliers.
     """
     for column in columns:
-        converted = False # Flag che uso per vedificare se gli elementi della feature sono stati convertiti da stringa a datetime
+        converted = False  # Flag che uso per vedificare se gli elementi della feature sono stati convertiti da stringa a datetime
 
         # Conversione della colonna in datetime, se necessario
         if df[column].dtype == 'object':  # Se è una stringa
@@ -177,6 +189,8 @@ def imputate_comune_residenza(df) -> pd.DataFrame:
                                       index=df_istat['Codice Comune formato alfanumerico'])
 
     def fill_missing_comune_residenza(row):
+        if row['codice_comune_residenza'] == 1168:
+            return "NONE"
         if row['comune_residenza'] is None:
             return codice_comune_to_nome.get(row['codice_comune_residenza'])
         return row['comune_residenza']
@@ -187,6 +201,62 @@ def imputate_comune_residenza(df) -> pd.DataFrame:
     # N.B. Dopo l'imputazione i valori mancanti relativi a comune_residenza continuano a risultare mancanti 
     in quanto relativi al comune di None in provincia di Torino con codice ISTAT 1168.
     '''
+
+    return df
+
+
+def imputate_codice_provincia_residenza(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Funzione che imputa i valori mancanti per 'codice_provincia_residenza' nel dataset.
+    Caso particolare: 'Napoli' ha codice nullo perché Pandas interpreta il codice 'NA' come NaN.
+    :param df:
+    :return:
+    """
+    # Carica il dataset
+    df_istat = pd.read_excel('datasets/Codici-statistici-e-denominazioni-al-30_06_2024.xlsx')
+
+    # Crea il dizionario
+    dict_province = dict(
+        zip(df_istat['Denominazione dell\'Unità territoriale sovracomunale \n(valida a fini statistici)'],
+            df_istat['Sigla automobilistica']))
+
+    # Rimpiazzo il valore relativo a Napoli con NA poiché Pandas tende ad interpretarlo automaticamente come un nan.
+    dict_province['Napoli'] = 'NA'
+
+    def fill_missing_codice_provincia_residenza(row):
+        if row['codice_provincia_residenza'] is None:
+            return dict_province.get(row['provincia_residenza'])
+        return row['codice_provincia_residenza']
+
+    df['codice_provincia_residenza'] = df.apply(fill_missing_codice_provincia_residenza, axis=1)
+
+    return df
+
+
+def imputate_codice_provincia_erogazione(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Funzione che imputa i valori mancanti per 'codice_provincia_residenza' nel dataset.
+    Caso particolare: 'Napoli' ha codice nullo perché Pandas interpreta il codice 'NA' come NaN.
+    :param df:
+    :return:
+    """
+    # Carica il dataset
+    df_istat = pd.read_excel('datasets/Codici-statistici-e-denominazioni-al-30_06_2024.xlsx')
+
+    # Crea il dizionario
+    dict_province = dict(
+        zip(df_istat['Denominazione dell\'Unità territoriale sovracomunale \n(valida a fini statistici)'],
+            df_istat['Sigla automobilistica']))
+
+    # Rimpiazzo il valore relativo a Napoli con NA poiché Pandas tende ad interpretarlo automaticamente come un nan.
+    dict_province['Napoli'] = 'NA'
+
+    def fill_missing_codice_provincia_erogazione(row):
+        if row['codice_provincia_erogazione'] is None:
+            return dict_province.get(row['provincia_erogazione'])
+        return row['codice_provincia_erogazione']
+
+    df['codice_provincia_erogazione'] = df.apply(fill_missing_codice_provincia_erogazione, axis=1)
 
     return df
 
@@ -224,7 +294,8 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
 
     # Converti la Series risultante in un dizionario
     media_durata_dict = media_durata.to_dict()
-    #print(media_durata_dict)
+
+    # print(media_durata_dict)
 
     # Funzione di supporto per l'imputazione
     def imputazione_riga(row):
@@ -232,17 +303,17 @@ def imputate_ora_inizio_erogazione_and_ora_fine_erogazione(df) -> pd.DataFrame:
                 row['data_disdetta']):
             codice_attivita = row['codice_descrizione_attivita']
             if codice_attivita in media_durata_dict:
-                #print(f"data erogazione: {row['data_erogazione']}. Dati imputati: {row['ora_inizio_erogazione']} , {row['ora_fine_erogazione']}")
+                # print(f"data erogazione: {row['data_erogazione']}. Dati imputati: {row['ora_inizio_erogazione']} , {row['ora_fine_erogazione']}")
                 durata_media = media_durata_dict[codice_attivita]
                 data_erogazione = row['data_erogazione']
                 row['ora_inizio_erogazione'] = data_erogazione
                 row['ora_fine_erogazione'] = data_erogazione + durata_media
-                #print(f"data erogazione: {row['data_erogazione']}. Dati imputati: {row['ora_inizio_erogazione']} , {row['ora_fine_erogazione']}")
+                # print(f"data erogazione: {row['data_erogazione']}. Dati imputati: {row['ora_inizio_erogazione']} , {row['ora_fine_erogazione']}")
         return row
 
     # Applica la funzione di imputazione a tutto il DataFrame
     df = df.apply(imputazione_riga, axis=1)
-    #print(df.iloc[8])
+
     check_missing_values_start(df)
     check_missing_values_end(df)
 
@@ -284,6 +355,7 @@ def check_missing_values_end(df):
     num_rows_with_end_missing = len(rows_with_end_missing)
     print(f"Numero di righe con 'ora_fine_erogazione' mancante: {num_rows_with_end_missing}")
 
+
 def ordina_date(df):
     """
 
@@ -293,5 +365,5 @@ def ordina_date(df):
     # Assicurati che la colonna delle date sia in formato datetime
     df['data_erogazione'] = pd.to_datetime(df['data_erogazione'])
     # Ordina il DataFrame in base alla colonna delle date
-    df= df.sort_values(by='data_erogazione')
+    df = df.sort_values(by='data_erogazione')
     return df
