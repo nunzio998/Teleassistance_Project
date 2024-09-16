@@ -13,15 +13,30 @@ In seguito, vengono analizzate le differenze tra i pazienti dei vari gruppi di i
 ## Struttura del Progetto
 Il progetto è strutturato in diverse fasi:
 
-**1. Pre-Processing dei Dati**: Data Cleaning e Feauture Selection
+**1.  Pre-Processing dei Dati**:
+
+La fase di Pre-Processing comprende:
+- Data Cleaning
+- Feauture Selection
 
 **2. Feature Extraction**:
 
+La fase di Feature Extraction comprende:
+- Estrazione di nuove feature
+- Estrazione della variabile target `incremento_teleassistenza`
+
 **3. Data Transformation**:
+
+La fase di Data Transformation comprende:
+- Encoding delle feature
 
 **4. Clustering Execution**:
 
-
+La fase di Clustering Execution comprende:
+- Esecuzione dell'algoritmo di clustering K-Means
+- Creazione delle metriche per la valutazione del clustering (metrica di Purezza, metrica di Silhouette e metrica finale)
+- Creazione di grafici per l'identificazione di pattern e feature rilevanti
+  
 ## Installazione e Setup
 **1. Clona la repository:**
 
