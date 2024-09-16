@@ -34,7 +34,7 @@ La fase di Data Transformation comprende:
 
 La fase di Clustering Execution comprende:
 - Esecuzione dell'algoritmo di clustering K-Means
-- Creazione delle metriche per la valutazione del clustering (metrica di Purezza, metrica di Silhouette e metrica finale)
+- Creazione delle metriche per la valutazione del clustering (`Metrica di Purezza`, `Metrica di Silhouette` e `Metrica finale`)
 - Creazione di grafici per l'identificazione di pattern e feature rilevanti
   
 ## Installazione e Setup
