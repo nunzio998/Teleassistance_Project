@@ -36,7 +36,8 @@ La fase di Clustering Execution comprende:
 - Esecuzione dell'algoritmo di clustering K-Means
 - Creazione delle metriche per la valutazione del clustering (`Metrica di Purezza`, `Metrica di Silhouette` e `Metrica finale`)
 - Creazione di grafici per l'identificazione di pattern e feature rilevanti
-  
+
+
 ## Installazione e Setup
 **1. Clona la repository:**
 
@@ -48,4 +49,8 @@ cd nome_repo
 **2. Installa le dipendenze:**
 ```bash
 pip install -r requirements.txt
+```
+## Esecuzione del Codice
+```bash
+python run.py
 ```
