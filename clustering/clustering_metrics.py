@@ -70,10 +70,13 @@ def compute_purity(df: pd.DataFrame, target_column: str):
     weighted_purity = sum(purity * len(df[df['Cluster'] == cluster]) for cluster, purity in cluster_purity.items())
     purity_score = weighted_purity / total_samples
 
+    # Stampa purezza di ciascun cluster con più decimali
     logging.info("Purezza di ciascun cluster:")
     for cluster, purity in cluster_purity.items():
-        logging.info(f"Cluster {cluster}: Purezza = {purity:.2f}")
-    logging.info(f"Purezza complessiva: {purity_score:.2f}\n")
+        logging.info(f"Cluster {cluster}: Purezza = {purity:.5f}")
+
+    # Stampa purezza complessiva con più decimali
+    logging.info(f"Purezza complessiva: {purity_score:.5f}\n")
 
     return cluster_purity, purity_score
 
