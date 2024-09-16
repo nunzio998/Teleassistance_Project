@@ -10,6 +10,26 @@ import logging
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
+def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='incremento'):
+    """
+     Calcola tutte le metriche e genera i grafici per il clustering.
+     :param df: DataFrame contenente i dati, inclusi i cluster.
+     :param label_encoders: Dizionario di LabelEncoders per la decodifica.
+     :param target_column: La colonna target rispetto alla quale calcolare le metriche.
+     """
+
+    # Calcolo la purezza di ogni cluster e la purezza media del clustering
+    cluster_purity, purity_score = compute_purity(df, target_column)
+
+    # Calcolo dell'indice di Silhouette
+    silhouette_score = compute_silhouette_score(df)
+
+    # Plot della purezza dei cluster
+    plot_purity_bars(cluster_purity, purity_score)
+
+    # Calcolo della metrica finale
+    final_metric = compute_final_metric(purity_score,silhouette_score, num_clusters=len(df['Cluster'].unique()))
+    print(f"\nLa metrica finale è : {final_metric:.2f}")
 
 def compute_silhouette_score(df: pd.DataFrame):
     """
@@ -128,26 +148,6 @@ def compute_final_metric(purity_score: float, silhouette_score: float, num_clust
     return final_metric
 
 
-def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='incremento'):
-    """
-     Calcola tutte le metriche e genera i grafici per il clustering.
-     :param df: DataFrame contenente i dati, inclusi i cluster.
-     :param label_encoders: Dizionario di LabelEncoders per la decodifica.
-     :param target_column: La colonna target rispetto alla quale calcolare le metriche.
-     """
-
-    # Calcolo la purezza di ogni cluster e la purezza media del clustering
-    cluster_purity, purity_score = compute_purity(df, target_column)
-
-    # Calcolo dell'indice di Silhouette
-    #silhouette_score = compute_silhouette_score(df)
-
-    # Plot della purezza dei cluster
-    plot_purity_bars(cluster_purity, purity_score)
-
-    # Calcolo della metrica finale
-    #final_metric = compute_final_metric(purity_score,silhouette_score, num_clusters=len(df['Cluster'].unique()))
-    #print(f"\nLa metrica finale è : {final_metric:.2f}")
 
 
 

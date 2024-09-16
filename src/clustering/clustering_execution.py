@@ -2,8 +2,8 @@ from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
-from clustering_analyzer import analyze_clustering
-from clustering_metrics import compute_all_metrics
+from src.clustering.clustering_analyzer import analyze_clustering
+from src.clustering.clustering_metrics import compute_all_metrics
 
 def execute_clustering(df, label_encoders, numerical_features, categorical_features, reverse_mapping):
     """

@@ -1,5 +1,6 @@
 import pandas as pd
 import logging
+import numpy as np
 
 # Configuro il logger
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log

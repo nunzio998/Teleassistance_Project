@@ -1,6 +1,7 @@
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import pandas as pd
+
 
 def data_transformation(df):
     """
@@ -20,6 +21,7 @@ def data_transformation(df):
 
     return df, label_encoders, reverse_mapping, numerical_features, categorical_features
 
+
 def remove_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Rimuove le feature poco significative dal DataFrame.
@@ -32,6 +34,7 @@ def remove_features(df: pd.DataFrame) -> pd.DataFrame:
         'struttura_erogazione', 'id_professionista_sanitario'
     ]
     return df.drop(columns=[col for col in features_to_drop if col in df.columns])
+
 
 def define_features_types() -> (list, list):
     """
