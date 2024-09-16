@@ -46,7 +46,10 @@ git clone https://github.com/username/nome_repo.git
 cd nome_repo
 ```
 
-**2. Installa le dipendenze:**
+**2. Creazione di un ambiente virtuale**:
+
+
+**3. Installa le dipendenze:**
 ```bash
 pip install -r requirements.txt
 ```
