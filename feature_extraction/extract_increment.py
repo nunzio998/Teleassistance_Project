@@ -81,9 +81,9 @@ def somma_per_intervallo_mesi(df, tipologie):
     # Verifico che le tipolgie di professionista sanitario siano quelle estratte in precedenza
     df_filtrato = df[df['tipologia_professionista_sanitario'].isin(tipologie)]
 
-    # Raggruppa e somma le occorrenze dei dati che hanno stesso tipologia di professionista sanitario, anno e intervallo di mesi
-    risultato = df_filtrato.groupby(['tipologia_professionista_sanitario', 'anno', 'intervallo_mesi'])[
-        'conteggio'].sum().reset_index()
+    # Raggruppa e somma i dati che hanno stesso tipologia di professionista sanitario, anno e intervallo di mesi
+    risultato = df_filtrato.groupby(['tipologia_professionista_sanitario', 'anno',
+                                     'intervallo_mesi'])['conteggio'].sum().reset_index()
 
     return risultato
 

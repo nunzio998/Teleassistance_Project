@@ -1,8 +1,6 @@
 from datetime import datetime
 import pandas as pd
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
 import logging
 
 # Configuro il logger
