@@ -14,3 +14,6 @@ cd nome_repo
 ```
 
 **2. Installa le dipendenze:**
+```bash
+pip install -r requirements.txt
+```
