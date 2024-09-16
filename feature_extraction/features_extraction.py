@@ -7,6 +7,30 @@ import logging
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
+def feature_extraction(df):
+    """
+    Aggiunge nuove features al DataFrame, elimina quelle ridondanti e crea dei grafici
+    della richiesta di ogni professionista sanitario per ogni mese.
+    :param df: dataFrame
+    :return df: dataFrame
+    """
+    # Calcola l'età del paziente e rimuove la colonna 'data_nascita'
+    df = extract_eta_paziente(df)
+    df = remove_data_nascita(df)
+
+    # Calcola la durata della televisita e rimuove le colonne dell'ora di inizio e fine erogazione
+    df = extract_durata_televisita(df)
+    df = remove_ora_erogazione(df)
+
+    # Divide il dataset per anno e mese, e crea grafici della richiesta di professionisti per ogni mese
+    df = extract_year_and_month(df)
+    save_grouped_by_year_and_month(df)
+
+    # Aggiunge al dataset il conteggio della richiesta di ogni professionista per ogni mese
+    df_aggregato = conta_professionisti_per_mese('month_dataset')
+    df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)
+
+    return df
 
 def extract_durata_televisita(df):
     """
@@ -174,29 +198,3 @@ def conta_professionisti_per_mese(cartella):
     pd.set_option('display.max_rows', None)
 
     return df_aggregato
-
-
-def feature_extraction(df):
-    """
-    Aggiunge nuove features al DataFrame, elimina quelle ridondanti e crea dei grafici
-    della richiesta di ogni professionista sanitario per ogni mese.
-    :param df: dataFrame
-    :return df: dataFrame
-    """
-    # Calcola l'età del paziente e rimuove la colonna 'data_nascita'
-    df = extract_eta_paziente(df)
-    df = remove_data_nascita(df)
-
-    # Calcola la durata della televisita e rimuove le colonne dell'ora di inizio e fine erogazione
-    df = extract_durata_televisita(df)
-    df = remove_ora_erogazione(df)
-
-    # Divide il dataset per anno e mese, e crea grafici della richiesta di professionisti per ogni mese
-    df = extract_year_and_month(df)
-    save_grouped_by_year_and_month(df)
-
-    # Aggiunge al dataset il conteggio della richiesta di ogni professionista per ogni mese
-    df_aggregato = conta_professionisti_per_mese('month_dataset')
-    df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)
-
-    return df

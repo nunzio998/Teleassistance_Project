@@ -9,6 +9,7 @@ import matplotlib.ticker as mticker
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
+
 def analyze_clustering(df, numerical_features, categorical_features, reverse_mapping, cluster_year_mapping):
     """
     Genera grafici per analizzare la distribuzione delle feature nei cluster.
@@ -19,15 +20,12 @@ def analyze_clustering(df, numerical_features, categorical_features, reverse_map
     :param cluster_year_mapping: anni per ogni cluster salvati in un dizionario
     :return: None
     """
-    # Generazione di grafici per caratteristiche numeriche
-    print("Generazione di grafici per caratteristiche numeriche...")
+    # Generazione di grafici per feature numeriche
     plot_numerical_features(df, numerical_features, cluster_year_mapping)
 
-    # Generazione di grafici per caratteristiche categoriali
-    print("Generazione di grafici per caratteristiche categoriali...")
+    # Generazione di grafici per feature categoriche
     plot_categorical_features(df, categorical_features, reverse_mapping, cluster_year_mapping)
 
-    return
 
 def plot_numerical_features(df, numerical_features, cluster_year_mapping):
     """
@@ -171,13 +169,3 @@ def plot_categorical_features(df, categorical_features, reverse_mapping, cluster
         file_path = f'graphs/{feature}_by_cluster.png'
         plt.savefig(file_path, bbox_inches='tight')
         plt.close()
-
-
-
-
-
-"""
-Considerazioni:
-1. Durata televisita infermiere: se è inferiore a un tot, vuol dire che non aveva bisogno di infermiere
- e lo ha reindirizzato?
-"""

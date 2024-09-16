@@ -11,11 +11,11 @@ import logging
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
+
 def compute_silhouette_score(df: pd.DataFrame):
     """
     Calcola e restituisce il Silhouette Score per il clustering effettuato,
     normalizzato nel range [0, 1].
-
     :param df: DataFrame con i dati (inclusa la colonna 'Cluster')
     :return: Valore normalizzato del Silhouette Score
     """
@@ -49,7 +49,7 @@ def compute_purity(df: pd.DataFrame, target_column: str):
     """
     Calcola la purezza del clustering per ciascun cluster e la purezza media ponderata.
 
-    :param data: DataFrame contenente i dati con le colonne 'Cluster' e la colonna target.
+    :param df: DataFrame contenente i dati con le colonne 'Cluster' e la colonna target.
     :param target_column: Colonna target rispetto alla quale calcolare la purezza.
     :return: Dizionario con le purezze per ciascun cluster e purezza complessiva.
     """
@@ -129,44 +129,13 @@ def compute_final_metric(purity_score: float, silhouette_score: float, num_clust
     return final_metric
 
 
-def plot_increment_distribution(df: pd.DataFrame, label_encoders: dict):
-    """
-    Crea un grafico a barre impilate per la distribuzione della variabile 'incremento' per ciascun cluster.
-    :param df: DataFrame contenente i dati con le colonne 'Cluster' e 'incremento'.
-    :param label_encoders (dict): dizionario che associa il nome di ciascuna colonna categorica al rispettivo
-                                  oggetto LabelEncoder.
-    """
-    if 'incremento' in label_encoders:
-        le_incremento = label_encoders['incremento']
-        df['incremento'] = le_incremento.inverse_transform(df['incremento'])
-
-    # Crea la cartella 'graphs' se non esiste
-    if not os.path.exists('graphs'):
-        os.makedirs('graphs')
-
-    # Plotta la distribuzione dell'incremento
-    plt.figure(figsize=(12, 6))
-    sns.countplot(data=df, x='Cluster', hue='incremento')
-    plt.title('Distribuzione della variabile target Incremento per Cluster')
-    plt.xlabel('Cluster')
-    plt.ylabel('Numero di Campioni')
-    plt.legend(title='Incremento')
-
-    # Salva il grafico nella cartella 'graphs'
-    plt.savefig('graphs/plot_increment_distribution.png')
-    plt.close()
-
 def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='incremento'):
     """
      Calcola tutte le metriche e genera i grafici per il clustering.
      :param df: DataFrame contenente i dati, inclusi i cluster.
      :param label_encoders: Dizionario di LabelEncoders per la decodifica.
      :param target_column: La colonna target rispetto alla quale calcolare le metriche.
-     :param pca_data: I dati ridotti dimensionalmente con PCA (opzionale).
      """
-
-    # Plotto la distribuzione dell'incremento rispetto ad ogni cluster
-    plot_increment_distribution(df, label_encoders)
 
     # Calcolo la purezza di ogni cluster e la purezza media del clustering
     cluster_purity, purity_score = compute_purity(df, target_column)

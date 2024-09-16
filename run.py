@@ -1,3 +1,4 @@
+import colorlog
 import pandas as pd
 from data_prep.data_cleaning import data_cleaning
 from data_prep.features_selection import feature_selection

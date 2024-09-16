@@ -15,9 +15,6 @@ def data_transformation(df):
     # Definisce quali sono le feature numeriche e quelle categoriche
     categorical_features, numerical_features = define_features_types()
 
-    # Applica la standardizzazione delle feature numeriche
-    #df = standardize_numerical_features(df)
-
     # Applica la trasformazione (encoding) delle feature categoriche
     df, label_encoders, reverse_mapping = transform_and_preprocess_data(df, categorical_features)
 
@@ -79,20 +76,4 @@ def transform_and_preprocess_data(df: pd.DataFrame, categorical_features: list):
 
     return df, label_encoders, reverse_mapping
 
-
-def standardize_numerical_features(df):
-    """
-    Standardizza le feature numeriche.
-    :param df: dataFrame
-    :param numerical_features: colonne delle feature numeriche
-    :return df: dataFrame con feature standardizzate
-    """
-    # Crea un'istanza dello StandardScaler
-    scaler = StandardScaler()
-    numerical_features = ['eta_paziente', 'durata_televisita']
-
-    # Applica la standardizzazione solo alle colonne specificate
-    df[numerical_features] = scaler.fit_transform(df[numerical_features])
-
-    return df
 
