@@ -6,3 +6,5 @@
 ## Descrizione del Progetto
 
 ## Installazione e Setup
+**1. Clona la repository:**
+**2. Installa le dipendenze:**
