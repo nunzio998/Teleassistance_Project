@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
 # Caricamento del dataset
-file_path = '../Teleassistance_Project/datasets/challenge_campus_biomedico_2024.parquet'
+file_path = '../src/datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
 
 # STEP 1: Data Cleaning
