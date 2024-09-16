@@ -13,13 +13,13 @@ In seguito, vengono analizzate le differenze tra i pazienti dei vari gruppi di i
 ## Struttura del Progetto
 Il progetto è strutturato in diverse fasi:
 
-*1. Pre-Processing dei Dati*: Data Cleaning e Feauture Selection
+**1. Pre-Processing dei Dati**: Data Cleaning e Feauture Selection
 
-*2. Feature Extraction*:
+**2. Feature Extraction**:
 
-*3. Data Transformation*:
+**3. Data Transformation**:
 
-*4. Clustering Execution*:
+**4. Clustering Execution**:
 
 
 ## Installazione e Setup
