@@ -16,7 +16,7 @@ def data_transformation(df):
     categorical_features, numerical_features = define_features_types()
 
     # Applica la standardizzazione delle feature numeriche
-    df = standardize_numerical_features(df)
+    #df = standardize_numerical_features(df)
 
     # Applica la trasformazione (encoding) delle feature categoriche
     df, label_encoders, reverse_mapping = transform_and_preprocess_data(df, categorical_features)

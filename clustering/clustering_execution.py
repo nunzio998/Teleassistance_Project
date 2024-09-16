@@ -20,8 +20,11 @@ def execute_clustering(df, label_encoders, numerical_features, categorical_featu
     # Aggiungiamo le etichette e le componenti principali al dataframe originale
     df['Cluster'] = labels
 
+    # Genera il dizionario automaticamente
+    cluster_year_mapping = generate_cluster_year_mapping(df, year_column='year')
+
     # Generazione dei plot per analizzare il clustering
-    analyze_clustering(df, numerical_features, categorical_features, reverse_mapping)
+    analyze_clustering(df, numerical_features, categorical_features, reverse_mapping, cluster_year_mapping)
 
     # Calcolo delle metriche
     compute_all_metrics(df, target_column='incremento', label_encoders=label_encoders)
@@ -75,5 +78,45 @@ def apply_clustering(data, n_clusters=4, n_components=None):
     svd_data = pipeline.named_steps['dim_reduction'].transform(data)
     return labels, svd_data
 
+def generate_cluster_year_mapping(df, year_column='year', month_column='month'):
+    """
+    Genera automaticamente un dizionario che mappa i cluster agli anni e mesi corrispondenti.
+    :param df: DataFrame con i dati, inclusi i cluster e le colonne degli anni e dei mesi.
+    :param year_column: Nome della colonna che contiene le informazioni sugli anni.
+    :param month_column: Nome della colonna che contiene le informazioni sui mesi.
+    :return: Dizionario che mappa i cluster agli anni e mesi corrispondenti.
+    """
+    # Raggruppa i dati per Cluster, Anno e Mese, e conta le occorrenze
+    year_month_distribution = df.groupby(['Cluster', year_column, month_column]).size().reset_index(name='counts')
+
+    # Crea un dizionario vuoto per la mappatura
+    cluster_year_mapping = {}
+
+    # Per ogni cluster, crea una stringa che rappresenta gli anni e i mesi associati
+    for cluster in year_month_distribution['Cluster'].unique():
+        cluster_data = year_month_distribution[year_month_distribution['Cluster'] == cluster]
+
+        # Crea un dizionario temporaneo per memorizzare i mesi per ogni anno
+        years_to_months = {}
+
+        for _, row in cluster_data.iterrows():
+            year = row[year_column]
+            month = row[month_column]
+
+            if year not in years_to_months:
+                years_to_months[year] = []
+            years_to_months[year].append(month)
+
+        # Crea una stringa che rappresenta l'associazione di anni e mesi
+        year_month_strings = []
+        for year, months in years_to_months.items():
+            month_range = f"{min(months)}-{max(months)}" if len(months) > 1 else str(min(months))
+            year_month_strings.append(f"{year} (mesi {month_range})")
+
+        # Unisci le stringhe di anno e mese
+        year_string = ", ".join(year_month_strings)
+        cluster_year_mapping[cluster] = year_string
+
+    return cluster_year_mapping
 
 
