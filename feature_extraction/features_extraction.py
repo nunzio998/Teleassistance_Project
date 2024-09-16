@@ -178,114 +178,6 @@ def conta_professionisti_per_mese(cartella):
     return df_aggregato
 
 
-def crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
-    """
-    Crea e salva il grafico a barre mensile per una specifica tipologia di professionista sanitario.
-    :param df_professionista: dataFrame filtrato per la tipologia di professionista sanitario specificata
-    :param tipologia_professionista (str): tipologia di professionista sanitario
-    :param tipologia_dir (str): directory dove salvare i grafici
-    :return None
-    """
-    # Percorso del file del grafico
-    output_path = os.path.join(tipologia_dir, f'grafico_mensile_{tipologia_professionista}.png')
-
-    # Verifica se il file esiste già
-    if not os.path.isfile(output_path):
-        plt.figure(figsize=(14, 8))
-        sns.barplot(x='mese', y='conteggio', hue='anno', data=df_professionista, palette="coolwarm", dodge=True)
-
-        # Configurazione delle etichette
-        plt.title(f'Richieste Mensili per {tipologia_professionista}', fontsize=20, weight='bold')
-        plt.xlabel('Mese', fontsize=14)
-        plt.ylabel('Numero di Richieste', fontsize=14)
-        plt.xticks(range(12), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
-                   fontsize=12)
-        plt.yticks(fontsize=12)
-        plt.grid(True, linestyle='--', linewidth=0.5)
-        plt.tight_layout()
-
-        # Salva il grafico
-        plt.savefig(output_path)
-        plt.close()
-        logging.info(f"Grafico mensile salvato in '{output_path}'.")
-
-
-def crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir):
-    """
-    Crea e salva gli istogrammi annuali per una specifica tipologia di professionista sanitario.
-    :param df_professionista: dataFrame filtrato per la tipologia specificata
-    :param tipologia_professionista (str): tipologia di professionista sanitario
-    :param tipologia_dir (str): directory dove salvare i grafici
-    """
-    # Estrai gli anni disponibili nel DataFrame
-    anni = df_professionista['anno'].unique()
-
-    # Creazione di un plot per ciascun anno
-    for anno in anni:
-        df_anno = df_professionista[df_professionista['anno'] == anno]
-
-        # Percorso del file dell'istogramma
-        output_path = os.path.join(tipologia_dir, f'istogramma_{tipologia_professionista}_anno{anno}.png')
-
-        # Verifica se il file esiste già PRIMA di fare qualsiasi operazione
-        if os.path.isfile(output_path):
-            continue
-
-        # Creazione dell'istogramma
-        plt.figure(figsize=(14, 8))
-        sns.histplot(data=df_anno, x='mese', weights='conteggio', bins=12, kde=False, color='skyblue', discrete=True)
-
-        # Configurazione delle etichette
-        plt.title(f'Frequenza delle Richieste Mensili per {tipologia_professionista} - Anno {anno}', fontsize=20,
-                  weight='bold')
-        plt.xlabel('Mese', fontsize=14)
-        plt.ylabel('Frequenza', fontsize=14)
-        plt.xticks(range(1, 13), ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
-                   fontsize=12)
-        plt.yticks(fontsize=12)
-        plt.grid(True, linestyle='--', linewidth=0.5)
-        plt.tight_layout()
-
-        # Salva l'istogramma
-        plt.savefig(output_path)
-        plt.close()
-
-
-def crea_grafici_e_salva(df_aggregato, output_dir='grafici_professionisti'):
-    """
-    Crea e salva grafici a barre e istogrammi per ogni tipologia di professionista sanitario.
-    :param df_aggregato: dataFrame aggregato contenente i dati mensili per ogni tipologia e anno.
-    :param output_dir (str): directory principale dove salvare i grafici.
-    """
-    # Creare la cartella principale se non esiste
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # Ottenere tutte le tipologie di professionisti sanitari
-    tipologie = df_aggregato['tipologia_professionista_sanitario'].unique()
-
-    for tipologia in tipologie:
-        # Sostituire i caratteri non validi nei nomi delle cartelle
-        tipologia_professionista = tipologia.replace('/', '_')
-
-        # Creare una sottocartella per ogni tipologia
-        tipologia_dir = os.path.join(output_dir, tipologia_professionista)
-        if not os.path.exists(tipologia_dir):
-            os.makedirs(tipologia_dir)
-
-        # Filtrare il DataFrame per la tipologia specificata
-        df_professionista = df_aggregato[df_aggregato['tipologia_professionista_sanitario'] == tipologia]
-
-        # Assicurarsi che i mesi siano ordinati da 1 a 12
-        df_professionista = df_professionista.sort_values(by=['mese', 'anno'])
-
-        # Creare e salvare il grafico a barre
-        crea_grafico_mensile_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
-
-        # Creare e salvare gli istogrammi per ogni anno
-        crea_istogrammi_mensili_per_anni(df_professionista, tipologia_professionista, tipologia_dir)
-
-
 def feature_extraction(df):
     """
     Aggiunge nuove features al DataFrame, elimina quelle ridondanti e crea dei grafici
@@ -304,9 +196,9 @@ def feature_extraction(df):
     # Divide il dataset per anno e mese, e crea grafici della richiesta di professionisti per ogni mese
     df = extract_year_and_month(df)
     save_grouped_by_year_and_month(df)
-    df_aggregato = conta_professionisti_per_mese('month_dataset')
-    crea_grafici_e_salva(df_aggregato)
 
-    # Salva il DataFrame aggregato in un file Parquet per ulteriori analisi
+    # Aggiunge al dataset il conteggio della richiesta di ogni professionista per ogni mese
+    df_aggregato = conta_professionisti_per_mese('month_dataset')
     df_aggregato.to_parquet('datasets/df_aggregato.parquet', index=False)
+
     return df

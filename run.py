@@ -11,14 +11,8 @@ import logging
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
-# Configura pandas per visualizzare un DataFrame senza limiti di spazio
-pd.set_option('display.max_rows', None)  # Nessun limite sul numero di righe
-pd.set_option('display.max_columns', None)  # Nessun limite sul numero di colonne
-pd.set_option('display.max_colwidth', None)  # Nessun limite sulla larghezza delle colonne
-pd.set_option('display.expand_frame_repr', False)  # Non espande il DataFrame su più righe
-
 # Caricamento del dataset
-file_path = 'challenge_campus_biomedico_2024.parquet'
+file_path = '../Teleassistance_Project/datasets/challenge_campus_biomedico_2024.parquet'
 df = pd.read_parquet(file_path)
 
 # STEP 1: Data Cleaning
