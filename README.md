@@ -6,7 +6,12 @@
 ## Descrizione del Progetto
 
 L'obiettivo del progetto è profilare i pazienti tenendo conto del loro contributo all'aumento del servizio di teleassistenza. 
-Per fare questo, si identifica una variabile target "incremento_teleassistenza", che viene usata come feature per guidare il clustering. Successivamente, si utilizza l'algoritmo di clustering K-Means per raggruppare i pazienti in base alle loro caratteristiche e alla variabile target. In seguito, vengono analizzate le differenze tra i pazienti dei vari gruppi di incremento, per comprendere quali caratteristiche influenzano l'aumento delle teleassistenze. Così facendo, è possibile identificare gruppi di pazienti con schemi comuni o comportamenti simili che influenzano maggiormente l'andamento delle teleassistenze.
+
+Per fare questo, si identifica una variabile target "incremento_teleassistenza", che viene usata come feature per guidare il clustering. 
+
+Per raggruppare i pazienti in base alle loro caratteristiche e alla variabile target si utilizza l'algoritmo di clustering K-Means.
+
+In seguito, vengono analizzate le differenze tra i pazienti dei vari gruppi di incremento, per comprendere quali caratteristiche influenzano l'aumento delle teleassistenze. Così facendo, è possibile identificare gruppi di pazienti con schemi comuni o comportamenti simili che influenzano maggiormente l'andamento delle teleassistenze.
 
 
 ## Installazione e Setup
