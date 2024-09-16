@@ -1,0 +1,3 @@
+Purezza del clustering: 0.88350
+Indice di Silhouette medio normalizzato: 0.7423666254281713
+Metrica finale: 0.61
