@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 from matplotlib import pyplot as plt
-import seaborn as sns
 from sklearn.metrics import silhouette_samples
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
