@@ -6,8 +6,8 @@
 ## Descrizione del Progetto
 
 L'obiettivo del progetto è profilare i pazienti presenti nel dataset `challenge_campus_biomedico_2024.parquet` tenendo conto del loro contributo all'aumento del servizio di teleassistenza.   
-Per fare questo, si identifica una variabile target `incremento_teleassistenza`, che viene considerata come feature principale per guidare il clustering; per questo motivo, parliamo di *"Clustering Supervisionato"*.  
-Il clustering viene svolto utilizzando l'algoritmo K-Means, che sfrutta le caratteristiche dei pazienti e la variabile target per suddividere i dati nei cluster.   
+Per fare questo, si identifica una variabile target `incremento_teleassistenza`, che viene considerata come feature principale per guidare il Clustering; per questo motivo, parliamo di *"Clustering Supervisionato"*.  
+Il Clustering viene svolto utilizzando l'algoritmo K-Means, che sfrutta le caratteristiche dei pazienti e la variabile target per suddividere i dati nei cluster.   
 In seguito, vengono analizzate le differenze tra i pazienti dei vari gruppi di incremento, per comprendere quali caratteristiche influenzano l'aumento delle teleassistenze. Così facendo, è possibile identificare gruppi di pazienti con schemi comuni o comportamenti simili che influenzano maggiormente l'andamento delle teleassistenze.
 
 ## Struttura del Progetto
@@ -33,8 +33,8 @@ La fase di Data Transformation comprende:
 **4. Clustering Execution**:
 
 La fase di Clustering Execution comprende:
-- Esecuzione dell'algoritmo di clustering K-Means
-- Creazione delle metriche per la valutazione del clustering (`Metrica di Purezza`, `Metrica di Silhouette` e `Metrica finale`)
+- Esecuzione dell'algoritmo di Clustering **K-Means**
+- Creazione delle metriche per la valutazione del Clustering (`Metrica di Purezza`, `Metrica di Silhouette` e `Metrica finale`)
 - Creazione di grafici per l'identificazione di pattern e feature rilevanti
 
 
