@@ -7,7 +7,7 @@
 
 ## Installazione e Setup
 **1. Clona la repository:**
-'''bash
+'''
 git clone https://github.com/username/nome_repo.git
 cd nome_repo
 '''
