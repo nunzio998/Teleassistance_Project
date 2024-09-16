@@ -46,8 +46,11 @@ git clone https://github.com/username/nome_repo.git
 cd nome_repo
 ```
 
-**2. Creazione di un ambiente virtuale**:
-
+**2. Crea un ambiente virtuale**:
+```bash
+python -m venv venv
+.\venv\Scripts\activate
+```
 
 **3. Installa le dipendenze:**
 ```bash
