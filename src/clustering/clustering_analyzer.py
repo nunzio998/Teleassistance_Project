@@ -31,8 +31,12 @@ def analyze_clustering(df, numerical_features, categorical_features, reverse_map
 
 def plot_year_month_features(df, cluster_year_mapping):
     """
-    Crea grafici boxplot solo per le feature 'year' e 'month', ordinando i cluster in base agli anni e mesi,
-    con miglioramenti per la leggibilità e la precisione.
+    Crea grafici boxplot per le feature numeriche 'year' e 'month', ordinando i cluster in base agli anni e mesi
+    per visualizzare la distribuzione temporale dei cluster.
+
+    :param df: DataFrame contenente i dati con le feature 'year' e 'month'
+    :param cluster_year_mapping: Dizionario che mappa ogni cluster agli anni e mesi corrispondenti
+    :return: Salva un grafico boxplot per le feature 'year' e 'month' che mostra la distribuzione temporale per ciascun cluster.
     """
 
     def sort_key(cluster):
@@ -94,8 +98,12 @@ def plot_year_month_features(df, cluster_year_mapping):
 
 def plot_age_distribution_by_age_group(df, cluster_year_mapping):
     """
-    Crea un grafico a barre per la distribuzione dell'età del paziente, suddividendo l'età in fasce specifiche,
+    Crea un grafico a barre per la feature numerica 'eta_paziente', suddividendo l'età in fasce specifiche,
     e mostra la distribuzione per cluster.
+
+    :param df: DataFrame contenente i dati con la feature 'eta_paziente'
+    :param cluster_year_mapping: Dizionario che mappa ogni cluster agli anni e mesi corrispondenti
+    :return: Salva un grafico a barre che mostra la distribuzione dell'età del paziente, suddivisa in fasce, per ciascun cluster.
     """
 
     # Definisci le fasce d'età
@@ -139,8 +147,12 @@ def plot_age_distribution_by_age_group(df, cluster_year_mapping):
 
 def plot_duration_distribution_by_duration_group(df, numerical_features):
     """
-    Crea un grafico a barre per la distribuzione della durata della televisita, suddividendo la durata in fasce specifiche,
+    Crea un grafico a barre per la feature numerica 'durata_televisita', suddividendo la durata in fasce specifiche,
     e mostra la distribuzione per cluster.
+
+    :param df: DataFrame contenente i dati
+    :param numerical_features: Lista delle feature numeriche (viene controllata la presenza di 'durata_televisita')
+    :return: Salva un grafico a barre che mostra la distribuzione della durata della televisita per ciascun cluster.
     """
 
     if 'durata_televisita' in numerical_features:
