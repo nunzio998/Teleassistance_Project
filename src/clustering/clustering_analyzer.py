@@ -1,9 +1,8 @@
-import os
 import logging
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
-import matplotlib.ticker as mticker
 
 # Configuro il logger
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
@@ -20,16 +19,18 @@ def analyze_clustering(df, numerical_features, categorical_features, reverse_map
     :param cluster_year_mapping: anni per ogni cluster salvati in un dizionario
     :return: None
     """
-    # Generazione di grafici per feature numeriche
-    plot_numerical_features(df, numerical_features, cluster_year_mapping)
+    # Generazione di grafici per caratteristiche numeriche
+    plot_year_month_features(df,cluster_year_mapping)
+    plot_age_distribution_by_age_group(df, cluster_year_mapping)
+    plot_duration_distribution_by_duration_group(df, numerical_features)
 
     # Generazione di grafici per feature categoriche
     plot_categorical_features(df, categorical_features, reverse_mapping, cluster_year_mapping)
 
 
-def plot_numerical_features(df, numerical_features, cluster_year_mapping):
+def plot_year_month_features(df, cluster_year_mapping):
     """
-    Crea grafici boxplot per le feature numeriche, ordinando i cluster in base agli anni e mesi,
+    Crea grafici a barre solo per le feature 'year' e 'month', ordinando i cluster in base agli anni e mesi,
     con miglioramenti per la leggibilità e la precisione.
     """
 
@@ -42,42 +43,32 @@ def plot_numerical_features(df, numerical_features, cluster_year_mapping):
 
     ordered_clusters = sorted(cluster_year_mapping.keys(), key=sort_key)
 
+    # Considera solo 'year' e 'month'
+    numerical_features = ['year', 'month']
+
     for feature in numerical_features:
         plt.figure(figsize=(10, 6))
 
         sns.set(style="whitegrid")
-        sns.boxplot(x='Cluster', y=feature, data=df, order=ordered_clusters,
-                    showmeans=True, meanline=True,
-                    meanprops={'color': 'red', 'linestyle': '--', 'linewidth': 2},
-                    boxprops={'facecolor': 'lightblue', 'edgecolor': 'darkblue', 'linewidth': 2},
-                    whiskerprops={'linewidth': 2, 'color': 'darkblue'},
-                    capprops={'linewidth': 2, 'color': 'darkblue'},
-                    medianprops={'linewidth': 2, 'color': 'green'})
 
-        # Definisci il range dei tick sull'asse Y (più dettagliato)
-        y_min, y_max = df[feature].min(), df[feature].max()
+        # Calcola il conteggio delle occorrenze di ciascun valore per la feature corrente
+        count_data = df.groupby([feature, 'Cluster']).size().reset_index(name='counts')
 
-        if 'year' in feature.lower() or 'month' in feature.lower():  # Controlla se è una variabile temporale
-            # Tick per anni o mesi (passo 1)
-            plt.yticks(np.arange(y_min, y_max + 1, 1))
-            plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(1))
-        else:
-            # Tick per altre variabili (passo 5)
-            plt.yticks(np.arange(y_min, y_max + 1, 5))
-            plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(5))
-            plt.gca().yaxis.set_minor_locator(mticker.MultipleLocator(1))
-
-        plt.grid(True, which='both', axis='y', linestyle='--', linewidth=0.5)
+        # Crea il bar plot
+        sns.barplot(x=feature, y='counts', hue='Cluster', data=count_data, palette="Set2")
 
         # Miglioramento della leggibilità con titoli ed etichette
         plt.title(f'Distribuzione per {feature} per Cluster (ordinati per anni e mesi)', fontsize=18)
-        plt.xlabel('Cluster', fontsize=14)
-        plt.ylabel(feature, fontsize=14)
+        plt.xlabel(feature.capitalize(), fontsize=14)
+        plt.ylabel('Count', fontsize=14)
         plt.xticks(fontsize=12)
         plt.yticks(fontsize=12)
 
-        # Linee tratteggiate rosse per distinguere i cluster
-        for i in range(1, len(ordered_clusters)):
+        # Aggiungi una griglia
+        plt.grid(True, which='both', axis='y', linestyle='--', linewidth=0.5)
+
+        # Linee tratteggiate rosse per distinguere tutti i mesi
+        for i in range(1, len(count_data[feature].unique())):
             plt.axvline(i - 0.5, color='red', linestyle='--', linewidth=1.5)
 
         # Aggiungi una nota sugli anni sotto il grafico
@@ -87,6 +78,92 @@ def plot_numerical_features(df, numerical_features, cluster_year_mapping):
 
         # Salva il grafico
         plt.savefig(f'graphs/{feature}_by_cluster.png', bbox_inches='tight')
+        plt.close()
+
+
+def plot_age_distribution_by_age_group(df, cluster_year_mapping):
+    """
+    Crea un grafico a barre per la distribuzione dell'età del paziente, suddividendo l'età in fasce specifiche,
+    e mostra la distribuzione per cluster.
+    """
+
+    # Definisci le fasce d'età
+    bins = [0, 15, 25, 35, 45, 60, 71, 100]
+    labels = ['0-15', '16-25', '26-35', '36-45', '46-60', '61-71', '82-100']
+
+    # Crea una nuova colonna nel dataframe che classifica le età nelle fasce
+    df['fasce_eta'] = pd.cut(df['eta_paziente'], bins=bins, labels=labels, right=False)
+
+    # Calcola il conteggio delle occorrenze per ciascuna fascia d'età e cluster
+    count_data = df.groupby(['fasce_eta', 'Cluster'], observed=False).size().reset_index(name='counts')
+
+    # Crea il bar plot
+    plt.figure(figsize=(10, 6))
+    sns.set(style="whitegrid")
+    sns.barplot(x='fasce_eta', y='counts', hue='Cluster', data=count_data, palette="Set2")
+
+    # Miglioramento della leggibilità con titoli ed etichette
+    plt.title('Distribuzione per Fasce di Età per Cluster', fontsize=18)
+    plt.xlabel('Fasce di Età', fontsize=14)
+    plt.ylabel('Count', fontsize=14)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+
+    # Aggiungi una griglia
+    plt.grid(True, which='both', axis='y', linestyle='--', linewidth=0.5)
+
+    # Linee tratteggiate rosse per separare le fasce d'età
+    for i in range(1, len(labels)):
+        plt.axvline(i - 0.5, color='red', linestyle='--', linewidth=1.5)
+
+    # Aggiungi una nota sugli anni sotto il grafico
+    year_annotation = "\n".join(
+        [f"Cluster {cluster}: Anni {cluster_year_mapping[cluster]}" for cluster in cluster_year_mapping.keys()])
+    plt.annotate(year_annotation, xy=(0.5, -0.2), xycoords="axes fraction", fontsize=12, ha="center", va="center")
+
+    # Salva il grafico
+    plt.savefig(f'graphs/eta_paziente_by_cluster.png', bbox_inches='tight')
+    plt.close()
+
+
+def plot_duration_distribution_by_duration_group(df, numerical_features):
+    """
+    Crea un grafico a barre per la distribuzione della durata della televisita, suddividendo la durata in fasce specifiche,
+    e mostra la distribuzione per cluster.
+    """
+
+    if 'durata_televisita' in numerical_features:
+        # Definisci le fasce di durata (in minuti)
+        bins = [0, 10, 20, 30, 45, 60, np.inf]
+        labels = ['0-10 min', '11-20 min', '21-30 min', '31-45 min', '46-60 min', '>60 min']
+
+        # Crea una nuova colonna nel dataframe che classifica le durate nelle fasce
+        df['fasce_durata'] = pd.cut(df['durata_televisita'], bins=bins, labels=labels, right=False)
+
+        # Calcola il conteggio delle occorrenze per ciascuna fascia di durata e cluster
+        count_data = df.groupby(['fasce_durata', 'Cluster'], observed=False).size().reset_index(name='counts')
+
+        # Crea il bar plot
+        plt.figure(figsize=(10, 6))
+        sns.set(style="whitegrid")
+        sns.barplot(x='fasce_durata', y='counts', hue='Cluster', data=count_data, palette="Set2")
+
+        # Miglioramento della leggibilità con titoli ed etichette
+        plt.title('Distribuzione per Fasce di Durata Televisita per Cluster', fontsize=18)
+        plt.xlabel('Fasce di Durata (min)', fontsize=14)
+        plt.ylabel('Count', fontsize=14)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+
+        # Aggiungi una griglia
+        plt.grid(True, which='both', axis='y', linestyle='--', linewidth=0.5)
+
+        # Linee tratteggiate rosse per separare le fasce di durata
+        for i in range(1, len(labels)):
+            plt.axvline(i - 0.5, color='red', linestyle='--', linewidth=1.5)
+
+        # Salva il grafico
+        plt.savefig(f'graphs/durata_televisita_by_cluster.png', bbox_inches='tight')
         plt.close()
 
 
