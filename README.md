@@ -125,8 +125,8 @@ La fase di Clustering Execution comprende:
 **1. Clona la repository:**
 
 ```bash
-git clone https://github.com/username/nome_repo.git
-cd nome_repo
+git clone https://github.com/nunzio998/Teleassistance_Project.git
+cd Teleassistance_Project
 ```
 
 **2. Crea un ambiente virtuale**:
