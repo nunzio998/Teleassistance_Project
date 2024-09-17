@@ -11,26 +11,64 @@ Il Clustering viene svolto utilizzando l'algoritmo `K-Means`, che sfrutta sia le
 In seguito, vengono analizzate le differenze tra i pazienti dei vari gruppi di incremento, per comprendere quali caratteristiche influenzano l'aumento delle teleassistenze. Così facendo, è possibile identificare gruppi di pazienti con schemi comuni o comportamenti simili che influenzano maggiormente l'andamento delle teleassistenze.
 
 ## Struttura del Progetto
-Il progetto è strutturato in diverse fasi:
+Il progetto è organizzato come segue:
 
-**1.  Pre-Processing dei Dati**:
+```
+Teleassistance_Project/
+├── documents/
+│   └── challenge_campus_biomedico.pdf
+├── src/
+│   ├── clustering/
+│   │   ├── clustering_analyzer.py
+│   │   ├── clustering_execution.py
+│   │   └── clustering_metrics.py
+│   │
+│   ├── data_prep/
+│   │   ├── data_cleaning.py
+│   │   └── features_selection.py
+│   │
+│   ├── data_transformation/
+│   │   └── data_transformation.py
+│   │
+│   ├── datasets/
+│   │   ├── challenge_campus_biomedico_2024.parquet
+│   │   ├── Codici-statistici-e-denominazioni-al-30_06_2024.xlsx
+│   │   ├── df_aggregato.parquet
+│   │   └── df_incremento_percentuale_esteso.parquet
+│   │
+│   ├── feature_extraction/
+│   │   ├── extract_increment.py
+│   │   └── features_extraction.py
+│   │
+│   ├── graphs/
+│   ├── month_dataset/
+│   └── run.py
+│
+├── README.md
+├── requirements.txt
+└── results.txt
+```
+
+Le fasi in cui il progetto è strutturato sono le seguenti:
+
+### Pre-Processing dei Dati
 
 La fase di Pre-Processing comprende:
 - Data Cleaning
 - Feauture Selection
 
-**2. Feature Extraction**:
+### Feature Extraction
 
 La fase di Feature Extraction comprende:
 - Estrazione di nuove feature
 - Estrazione della variabile target `incremento_teleassistenza`
 
-**3. Data Transformation**:
+### Data Transformation
 
 La fase di Data Transformation comprende:
 - Encoding delle feature
 
-**4. Clustering Execution**:
+### Clustering Execution
 
 La fase di Clustering Execution comprende:
 - Esecuzione dell'algoritmo di Clustering **K-Means**
