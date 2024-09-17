@@ -113,9 +113,12 @@ La fase di Dimensionality Reduction è fondamentale per una corretta esecuzione 
 ### Clustering Execution
 
 La fase di Clustering Execution comprende:
-- Esecuzione dell'algoritmo di Clustering **K-Means**
-- Creazione delle metriche per la valutazione del Clustering: `Metrica di Purezza`, `Metrica di Silhouette` e `Metrica finale`
-- Creazione di grafici per l'identificazione di pattern e feature rilevanti
+- Esecuzione dell'algoritmo di Clustering **K-Means**. Il K-Means suddivide i dati in K cluster iniziando con K centroidi scelti casualmente. A ogni iterazione, assegna i punti al centroide più vicino e ricalcola i centroidi come la media dei punti nel cluster, ripetendo il processo fino a convergenza, quando le assegnazioni non cambiano più.
+- Creazione delle metriche per la valutazione del Clustering:
+  - `Metrica di Purezza`: La purezza del clustering misura la qualità di un clustering calcolando la proporzione di campioni correttamente classificati all'interno di ciascun cluster.
+  - `Metrica di Silhouette`: L'indice di Silhouette valuta la qualità del clustering misurando quanto i campioni siano vicini ai punti del loro stesso cluster rispetto ai punti di altri cluster.
+  - `Metrica finale`: La metrica finale viene calcolata come la differenza fra la media delle due metriche normalizzate e un termine di penalità pari a 0.05 volte il numero di cluster.
+- Creazione di grafici per l'identificazione di pattern e feature rilevanti.
 
 
 ## Installazione e Setup
