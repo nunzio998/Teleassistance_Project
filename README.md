@@ -57,6 +57,38 @@ La fase di Pre-Processing comprende:
 - Data Cleaning
 - Feauture Selection
 
+#### Data Cleaning
+Durante la fase di data cleaning vengono eseguite le seguenti operazioni per la pulizia del dataset:
+- **Imputazione dei valori mancanti**: viene effettuato un check per verificare quali sono le feature che contengono valori mancanti, successivamente si
+passa all'imputazione degli stessi. Le features per le quali viene svolto tale processo sono: 'comune_residenza', 'codice_provincia_residenza', 'codice_provincia_erogazione',
+'ora_inizio_erogazione' e 'ora_fine_erogazione'
+- **Rimozione dei campioni con 'data_disdetta' non nullo**: questi campioni vengono rimossi in quanto relativi a televisite che non sono avvenute poiché disdette.
+- **Identificazione e rimozione degli outliers**: questa operazione avviene per le seguenti features: 'data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione' e 'ora_fine_erogazione'
+- **Gestione dei dati rumorosi**: questa operazione avviene per le seguenti features: 'data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione' e 'ora_fine_erogazione'
+- **Rimozione dei duplicati**: se presenti, vengono rimossi i campioni duplicati.
+- **Ordinamento delle date di erogazione**: I campioni vengono ordinati in base alla data di erogazione del servizio.
+
+#### Feature Selection
+Durante la fase di features selection vengono eseguite le seguenti operazioni:
+- **Analisi della correlazione univoca**: viene eseguita un'analisi per controllare se due features hanno tra loro correlazione univoca. In caso affermativo
+una delle due viene rimossa. Questa analisi viene effettuata sulle seguenti coppie di features:<br>
+  - 'codice_provincia_residenza', 'provincia_residenza'
+  - 'codice_provincia_erogazione', 'provincia_erogazione'
+  - 'codice_regione_residenza', 'regione_residenza'
+  - 'codice_asl_residenza', 'asl_residenza'
+  - 'codice_comune_residenza', 'comune_residenza'
+  - 'codice_descrizione_attivita', 'descrizione_attivita'
+  - 'codice_regione_erogazione', 'regione_erogazione'
+  - 'codice_asl_erogazione', 'asl_erogazione'
+  - 'codice_struttura_erogazione', 'struttura_erogazione'
+  - 'codice_tipologia_struttura_erogazione', 'tipologia_struttura_erogazione'
+  - 'codice_tipologia_professionista_sanitario', 'tipologia_professionista_sanitario'
+- **Rimozione 'data_disdetta'**: tale features viene rimossa poiché dopo il processo di data cleaning presenterà solo valori mancanti.
+- **Rimozione 'id_prenotazione'**: la feature viene rimossa in quanto considerata non significativa ai fini delle analisi svolte sull'andamento delle televisite.
+- **Check 'regione_residenza' & 'reione_erogazione'**: viene effettuato un check sulla coppia di feature per verificare se per ogni campione i loro valori corrispondono. In caso affermarivo viene rimossa l afeature 'regione_erogazione'.
+- **Check 'tipologia_servizio'**: viene effettuato un check su tale features per verificare se il valore è il medesimo per ogni campione. In caso affermativo la feature stessa viene rimossa.
+Tale verifica è stata ritenuta necessaria in quanto, dopo una prima visione del dataset, si è notato che per tutti i campioni visionati il valore corrisponde sempre a 'Teleassistenza'.
+
 ### Feature Extraction
 
 La fase di Feature Extraction comprende:
