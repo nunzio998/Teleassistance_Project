@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import matplotlib.ticker as mticker
 
 # Configuro il logger
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
@@ -30,7 +31,7 @@ def analyze_clustering(df, numerical_features, categorical_features, reverse_map
 
 def plot_year_month_features(df, cluster_year_mapping):
     """
-    Crea grafici a barre solo per le feature 'year' e 'month', ordinando i cluster in base agli anni e mesi,
+    Crea grafici boxplot solo per le feature 'year' e 'month', ordinando i cluster in base agli anni e mesi,
     con miglioramenti per la leggibilità e la precisione.
     """
 
@@ -51,24 +52,33 @@ def plot_year_month_features(df, cluster_year_mapping):
 
         sns.set(style="whitegrid")
 
-        # Calcola il conteggio delle occorrenze di ciascun valore per la feature corrente
-        count_data = df.groupby([feature, 'Cluster']).size().reset_index(name='counts')
+        # Crea il boxplot
+        sns.boxplot(x='Cluster', y=feature, data=df, order=ordered_clusters,
+                    showmeans=True, meanline=True,
+                    meanprops={'color': 'red', 'linestyle': '--', 'linewidth': 2},
+                    boxprops={'facecolor': 'lightblue', 'edgecolor': 'darkblue', 'linewidth': 2},
+                    whiskerprops={'linewidth': 2, 'color': 'darkblue'},
+                    capprops={'linewidth': 2, 'color': 'darkblue'},
+                    medianprops={'linewidth': 2, 'color': 'green'})
 
-        # Crea il bar plot
-        sns.barplot(x=feature, y='counts', hue='Cluster', data=count_data, palette="Set2")
+        # Definisci il range dei tick sull'asse Y per year e month
+        y_min, y_max = df[feature].min(), df[feature].max()
+
+        # Tick per variabili temporali (anni e mesi)
+        plt.yticks(np.arange(y_min, y_max + 1, 1))
+        plt.gca().yaxis.set_major_locator(mticker.MultipleLocator(1))
+
+        plt.grid(True, which='both', axis='y', linestyle='--', linewidth=0.5)
 
         # Miglioramento della leggibilità con titoli ed etichette
         plt.title(f'Distribuzione per {feature} per Cluster (ordinati per anni e mesi)', fontsize=18)
-        plt.xlabel(feature.capitalize(), fontsize=14)
-        plt.ylabel('Count', fontsize=14)
+        plt.xlabel('Cluster', fontsize=14)
+        plt.ylabel(feature.capitalize(), fontsize=14)
         plt.xticks(fontsize=12)
         plt.yticks(fontsize=12)
 
-        # Aggiungi una griglia
-        plt.grid(True, which='both', axis='y', linestyle='--', linewidth=0.5)
-
-        # Linee tratteggiate rosse per distinguere tutti i mesi
-        for i in range(1, len(count_data[feature].unique())):
+        # Linee tratteggiate rosse per distinguere i cluster
+        for i in range(1, len(ordered_clusters)):
             plt.axvline(i - 0.5, color='red', linestyle='--', linewidth=1.5)
 
         # Aggiungi una nota sugli anni sotto il grafico
@@ -79,6 +89,7 @@ def plot_year_month_features(df, cluster_year_mapping):
         # Salva il grafico
         plt.savefig(f'graphs/{feature}_by_cluster.png', bbox_inches='tight')
         plt.close()
+
 
 
 def plot_age_distribution_by_age_group(df, cluster_year_mapping):
