@@ -92,13 +92,23 @@ Tale verifica è stata ritenuta necessaria in quanto, dopo una prima visione del
 ### Feature Extraction
 
 La fase di Feature Extraction comprende:
-- Estrazione di nuove feature
-- Estrazione della variabile target `incremento_teleassistenza`
+- **Estrazione di nuove feature**:
+  - Dalla feature "data_nascita" viene estratta la nuova feature "età_paziente"
+  - Dalle feature "ora_inizio_erogazione" e "ora_fine_erogazione" viene estratta la nuova feature "durata_televisita"
+  - Dalla feature "data_erogazione" vengono estratte le feature "anno" e "mese"
+- **Estrazione della variabile target `incremento_teleassistenza`**:
+
+La feature viene estratta seguendo diverse fasi:
+  - Calcolo della richiesta di ogni professionista sanitario per un intervallo temporale di 6 mesi.
+  - Calcolo dell'incremento percentuale per semestri di anni successivi.
+  - Creazione di una nuova feature Incremento, che può assumere valori alto, medio, basso e costante.
 
 ### Data Transformation
 
 La fase di Data Transformation comprende:
-- Encoding delle feature
+- **Encoding delle feature**: le feature categoriche vengono convertite in feature numeriche tramite codifica *Label Encoding*.
+- **Dimensionality Reduction**: il numero di feature viene ridotto utilizzando la tecnica di dimensionality reduction *TruncatedSVD*. Queste tecnica, diversamente dalla PCA, può essere applicato ai dati sparsi senza la necessità di centrare i dati.
+La fase di Dimensionality Reduction è fondamentale per una corretta esecuzione dell'algoritmo di Clustering.
 
 ### Clustering Execution
 
