@@ -55,22 +55,22 @@ Le fasi in cui il progetto è strutturato sono le seguenti:
 
 La fase di Pre-Processing comprende:
 - Data Cleaning
-- Feauture Selection
+- Feautures Selection
 
 #### Data Cleaning
 Durante la fase di data cleaning vengono eseguite le seguenti operazioni per la pulizia del dataset:
-- **Imputazione dei valori mancanti**: viene effettuato un check per verificare quali sono le feature che contengono valori mancanti, successivamente si
+- **Imputazione dei valori mancanti**: Viene effettuato un check per verificare quali sono le features che contengono valori mancanti, successivamente si
 passa all'imputazione degli stessi. Le features per le quali viene svolto tale processo sono: 'comune_residenza', 'codice_provincia_residenza', 'codice_provincia_erogazione',
 'ora_inizio_erogazione' e 'ora_fine_erogazione'
-- **Rimozione dei campioni con 'data_disdetta' non nullo**: questi campioni vengono rimossi in quanto relativi a televisite che non sono avvenute poiché disdette.
-- **Identificazione e rimozione degli outliers**: questa operazione avviene per le seguenti features: 'data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione' e 'ora_fine_erogazione'
-- **Gestione dei dati rumorosi**: questa operazione avviene per le seguenti features: 'data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione' e 'ora_fine_erogazione'
-- **Rimozione dei duplicati**: se presenti, vengono rimossi i campioni duplicati.
+- **Rimozione dei campioni con 'data_disdetta' non nullo**: Questi campioni vengono rimossi in quanto relativi a televisite che non sono avvenute poiché disdette.
+- **Identificazione e rimozione degli outliers**: Questa operazione avviene per le seguenti features: 'data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione' e 'ora_fine_erogazione'
+- **Gestione dei dati rumorosi**: Questa operazione avviene per le seguenti features: 'data_nascita', 'data_contatto', 'data_erogazione', 'ora_inizio_erogazione' e 'ora_fine_erogazione'
+- **Rimozione dei duplicati**: Se presenti, vengono rimossi i campioni duplicati.
 - **Ordinamento delle date di erogazione**: I campioni vengono ordinati in base alla data di erogazione del servizio.
 
 #### Feature Selection
 Durante la fase di features selection vengono eseguite le seguenti operazioni:
-- **Analisi della correlazione univoca**: viene eseguita un'analisi per controllare se due features hanno tra loro correlazione univoca. In caso affermativo
+- **Analisi della correlazione univoca**: Viene eseguita un'analisi per controllare se due features hanno tra loro correlazione univoca. In caso affermativo
 una delle due viene rimossa. Questa analisi viene effettuata sulle seguenti coppie di features:<br>
   - 'codice_provincia_residenza', 'provincia_residenza'
   - 'codice_provincia_erogazione', 'provincia_erogazione'
@@ -83,10 +83,10 @@ una delle due viene rimossa. Questa analisi viene effettuata sulle seguenti copp
   - 'codice_struttura_erogazione', 'struttura_erogazione'
   - 'codice_tipologia_struttura_erogazione', 'tipologia_struttura_erogazione'
   - 'codice_tipologia_professionista_sanitario', 'tipologia_professionista_sanitario'
-- **Rimozione 'data_disdetta'**: tale features viene rimossa poiché dopo il processo di data cleaning presenterà solo valori mancanti.
-- **Rimozione 'id_prenotazione'**: la feature viene rimossa in quanto considerata non significativa ai fini delle analisi svolte sull'andamento delle televisite.
-- **Check 'regione_residenza' & 'reione_erogazione'**: viene effettuato un check sulla coppia di feature per verificare se per ogni campione i loro valori corrispondono. In caso affermarivo viene rimossa l afeature 'regione_erogazione'.
-- **Check 'tipologia_servizio'**: viene effettuato un check su tale features per verificare se il valore è il medesimo per ogni campione. In caso affermativo la feature stessa viene rimossa.
+- **Rimozione 'data_disdetta'**: Tale feature viene rimossa poiché dopo il processo di data cleaning presenterà solo valori mancanti.
+- **Rimozione 'id_prenotazione'**: La feature viene rimossa in quanto considerata non significativa ai fini delle analisi svolte sull'andamento delle televisite.
+- **Check 'regione_residenza' & 'reione_erogazione'**: Viene effettuato un check sulla coppia di feature per verificare se per ogni campione i loro valori corrispondono. In caso affermarivo viene rimossa la feature 'regione_erogazione'.
+- **Check 'tipologia_servizio'**: Viene effettuato un check su tale feature per verificare se il valore è il medesimo per ogni campione. In caso affermativo la feature stessa viene rimossa.
 Tale verifica è stata ritenuta necessaria in quanto, dopo una prima visione del dataset, si è notato che per tutti i campioni visionati il valore corrisponde sempre a 'Teleassistenza'.
 
 ### Feature Extraction
@@ -96,18 +96,18 @@ La fase di Feature Extraction comprende:
   - Dalla feature "data_nascita" viene estratta la nuova feature "età_paziente"
   - Dalle feature "ora_inizio_erogazione" e "ora_fine_erogazione" viene estratta la nuova feature "durata_televisita"
   - Dalla feature "data_erogazione" vengono estratte le feature "anno" e "mese"
-- **Estrazione della variabile target `incremento_teleassistenza`**:
+- **Estrazione della variabile target `Incremento_teleassistenza`**:
 
 La feature viene estratta seguendo diverse fasi:
   - Calcolo della richiesta di ogni professionista sanitario per un intervallo temporale di 6 mesi.
   - Calcolo dell'incremento percentuale per semestri di anni successivi.
-  - Creazione di una nuova feature Incremento, che può assumere valori alto, medio, basso e costante.
+  - Creazione di una nuova feature "Incremento_teleassistenza", che può assumere valori alto, medio, basso e costante.
 
 ### Data Transformation
 
 La fase di Data Transformation comprende:
-- **Encoding delle feature**: le feature categoriche vengono convertite in feature numeriche tramite codifica *Label Encoding*.
-- **Dimensionality Reduction**: il numero di feature viene ridotto utilizzando la tecnica di dimensionality reduction *TruncatedSVD*. Queste tecnica, diversamente dalla PCA, può essere applicato ai dati sparsi senza la necessità di centrare i dati.
+- **Encoding delle feature**: Le feature categoriche vengono convertite in feature numeriche tramite codifica *Label Encoding*.
+- **Dimensionality Reduction**: Il numero di feature viene ridotto utilizzando la tecnica di dimensionality reduction *TruncatedSVD*. Queste tecnica, diversamente dalla PCA, può essere applicata ai dati sparsi senza la necessità di centrare i dati.
 La fase di Dimensionality Reduction è fondamentale per una corretta esecuzione dell'algoritmo di Clustering.
 
 ### Clustering Execution
@@ -130,26 +130,24 @@ cd Teleassistance_Project
 ```
 
 **2. Crea un ambiente virtuale**:
-```bash
-PER MAC:
 
+Per ambiente MacOS:
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
 
-
-PER WINDOWS:
-
+Per ambiente Windows:
+```bash
 python -m venv venv
 .\venv\Scripts\activate
 ```
 
 **3. Installa le dipendenze:**
+
 ```bash
-pip install -r requirements.txt
-
-
-PER ERRORI ESEGUIRE PRIMA:
 pip install --upgrade pip
+pip install -r requirements.txt
 
 ```
 ## Esecuzione del Codice
