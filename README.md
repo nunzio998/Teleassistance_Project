@@ -131,6 +131,14 @@ cd Teleassistance_Project
 
 **2. Crea un ambiente virtuale**:
 ```bash
+PER MAC:
+
+python3 -m venv venv
+source venv/bin/activate
+
+
+PER WINDOWS:
+
 python -m venv venv
 .\venv\Scripts\activate
 ```
@@ -138,6 +146,11 @@ python -m venv venv
 **3. Installa le dipendenze:**
 ```bash
 pip install -r requirements.txt
+
+
+PER ERRORI ESEGUIRE PRIMA:
+pip install --upgrade pip
+
 ```
 ## Esecuzione del Codice
 ```bash
