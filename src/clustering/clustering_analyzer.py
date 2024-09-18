@@ -38,11 +38,19 @@ def plot_year_month_features(df, cluster_year_mapping):
     :param cluster_year_mapping: Dizionario che mappa ogni cluster agli anni e mesi corrispondenti
     :return: Salva un grafico boxplot per le feature 'year' e 'month' che mostra la distribuzione temporale per ciascun cluster.
     """
-
     def sort_key(cluster):
+        """
+        Definisce una chiave di ordinamento per i cluster basata sugli anni associati a ciascun cluster.
+        :param cluster: Il cluster di cui si vuole ottenere la chiave di ordinamento.
+        :return: Una tupla utilizzata per l'ordinamento.
+        """
+        # Estrae gli anni associati al cluster come una lista
         years = cluster_year_mapping[cluster].split(', ')
+
+        # Se il cluster è associato a un solo anno, restituisce l'anno come intero e 0 come priorità per l'ordinamento.
         if len(years) == 1:
             return int(years[0].split()[0]), 0
+        # Se il cluster è associato a più anni, restituisce il primo anno come intero e 1 per differenziare i cluster con più anni.
         else:
             return int(years[0].split()[0]), 1
 

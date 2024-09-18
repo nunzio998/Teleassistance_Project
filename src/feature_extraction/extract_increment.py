@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def incremento(df):
     """
     Funzione principale che calcola la variabile di incremento, estende i risultati per ciascun mese

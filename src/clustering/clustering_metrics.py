@@ -10,7 +10,8 @@ import logging
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
-def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='incremento'):
+
+def compute_all_metrics(df: pd.DataFrame, target_column='incremento'):
     """
      Calcola tutte le metriche e genera i grafici per il clustering.
      :param df: DataFrame contenente i dati, inclusi i cluster.
@@ -28,8 +29,9 @@ def compute_all_metrics(df: pd.DataFrame, label_encoders, target_column='increme
     plot_purity_bars(cluster_purity, purity_score)
 
     # Calcolo della metrica finale
-    final_metric = compute_final_metric(purity_score,silhouette_score, num_clusters=len(df['Cluster'].unique()))
+    final_metric = compute_final_metric(purity_score, silhouette_score, num_clusters=len(df['Cluster'].unique()))
     print(f"\nLa metrica finale è : {final_metric:.2f}")
+
 
 def compute_silhouette_score(df: pd.DataFrame):
     """
@@ -54,7 +56,7 @@ def compute_silhouette_score(df: pd.DataFrame):
 
     # Normalizza i valori del silhouette nel range [0, 1]
     normalized_silhouette_values = (silhouette_values - silhouette_values.min()) / (
-                silhouette_values.max() - silhouette_values.min())
+            silhouette_values.max() - silhouette_values.min())
 
     # Calcola il silhouette score medio normalizzato
     final_score = np.mean(normalized_silhouette_values)
@@ -146,8 +148,3 @@ def compute_final_metric(purity_score: float, silhouette_score: float, num_clust
     final_metric = mean_normalized_metric - penalty
 
     return final_metric
-
-
-
-
-

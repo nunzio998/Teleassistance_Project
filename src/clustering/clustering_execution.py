@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline
 from src.clustering.clustering_analyzer import analyze_clustering
 from src.clustering.clustering_metrics import compute_all_metrics
 
+
 def execute_clustering(df, label_encoders, numerical_features, categorical_features, reverse_mapping):
     """
     Metodo che esegue tutti i metodi del file clustering_execution
@@ -27,9 +28,10 @@ def execute_clustering(df, label_encoders, numerical_features, categorical_featu
     analyze_clustering(df, numerical_features, categorical_features, reverse_mapping, cluster_year_mapping)
 
     # Calcolo delle metriche
-    compute_all_metrics(df, target_column='incremento', label_encoders=label_encoders)
+    compute_all_metrics(df, target_column='incremento')
 
     return df, labels, svd_data
+
 
 def plot_elbow_method(data, max_clusters=10):
     """
@@ -78,6 +80,7 @@ def apply_clustering(data, n_clusters=4, n_components=None):
     svd_data = pipeline.named_steps['dim_reduction'].transform(data)
     return labels, svd_data
 
+
 def generate_cluster_year_mapping(df, year_column='year', month_column='month'):
     """
     Genera automaticamente un dizionario che mappa i cluster agli anni e mesi corrispondenti.
@@ -118,5 +121,3 @@ def generate_cluster_year_mapping(df, year_column='year', month_column='month'):
         cluster_year_mapping[cluster] = year_string
 
     return cluster_year_mapping
-
-
