@@ -6,48 +6,6 @@ import numpy as np
 logging.basicConfig(level=logging.INFO,  # Imposto il livello minimo di log
                     format='%(asctime)s - %(levelname)s - %(message)s')  # Formato del log
 
-def corr_matrix_correlation_analisys(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Funzione che controlla se c'è correlazione univoca tra due features e in caso affermativo ne rimuove una.
-    Non viene utilizzata poiché per alcune features la matrice di correlazione è troppo grande per essere costruita in
-    un tempo ragionevole.
-    :param df:
-    :return:
-    """
-    features_pairs = [
-        ('codice_provincia_residenza', 'provincia_residenza'),
-        ('codice_provincia_erogazione', 'provincia_erogazione'),
-        ('codice_regione_residenza', 'regione_residenza'),
-        ('codice_asl_residenza', 'asl_residenza'),
-        ('codice_comune_residenza', 'comune_residenza'),
-        ('codice_descrizione_attivita', 'descrizione_attivita'),
-        ('codice_regione_erogazione', 'regione_erogazione'),
-        ('codice_asl_erogazione', 'asl_erogazione'),
-        ('codice_struttura_erogazione', 'struttura_erogazione'),
-        ('codice_tipologia_struttura_erogazione', 'tipologia_struttura_erogazione'),
-        ('codice_tipologia_professionista_sanitario', 'tipologia_professionista_sanitario')
-    ]
-
-    for pair in [('codice_comune_residenza', 'comune_residenza')]:
-        df_selected = df[[pair[0], pair[1]]]
-        print(df_selected)
-        # Applica One-Hot Encoding
-        df_encoded = pd.get_dummies(df_selected, drop_first=True)  # Specifica le colonne di stringhe
-
-        # Calcola la matrice di correlazione
-        corr_matrix = df_encoded.corr(method='pearson')
-        print(corr_matrix)
-        # Conta il numero di 1.000000 per ogni colonna
-        conteggi = np.sum(corr_matrix == 1.000000, axis=0)
-        print(conteggi)
-
-        # Verifica che ogni colonna abbia esattamente 2 valori di 1.000000, se si allora c'è un alta correlazione tra le due feature per cui elimino la prima.
-        if np.all(conteggi == 2):
-            df.drop(columns=[pair[0]])
-            print(f"Feature {pair[0]} eliminata per alta correlazione con la feature {pair[1]}")
-
-    return df
-
 
 def unique_correlation_analisys(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -68,21 +26,6 @@ def unique_correlation_analisys(df: pd.DataFrame) -> pd.DataFrame:
         ('codice_tipologia_struttura_erogazione', 'tipologia_struttura_erogazione'),
         ('codice_tipologia_professionista_sanitario', 'tipologia_professionista_sanitario')
     ]
-
-    # print(df.groupby('codice_struttura_erogazione')['struttura_erogazione'].nunique())
-    # print(df.groupby('struttura_erogazione')['codice_struttura_erogazione'].nunique())
-    #
-    # # Verifica il numero di descrizioni univoche per ogni codice_comune_residenza
-    # codici_non_univoci = df.groupby('codice_struttura_erogazione')['struttura_erogazione'].nunique()
-    # codici_non_univoci = codici_non_univoci[codici_non_univoci != 1]  # Filtra dove il valore non è 1
-    # print("Codici con più di una descrizione univoca:")
-    # print(codici_non_univoci)
-    #
-    # # Verifica il numero di codici univoci per ogni comune_residenza
-    # comuni_non_univoci = df.groupby('struttura_erogazione')['codice_struttura_erogazione'].nunique()
-    # comuni_non_univoci = comuni_non_univoci[comuni_non_univoci != 1]  # Filtra dove il valore non è 1
-    # print("\nComuni con più di un codice univoco:")
-    # print(comuni_non_univoci)
 
     for pair in features_pairs:
         codice_univoco = df.groupby(pair[0])[pair[1]].nunique() == 1
